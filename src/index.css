@@ -2,117 +2,136 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Modern design system inspired by Linear and Notion
+All colors MUST be HSL for consistency.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 13% 18%;
+    /* Modern warm neutrals - inspired by Linear/Notion */
+    --background: 0 0% 99%;
+    --foreground: 215 25% 27%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 13% 18%;
+    --card-foreground: 215 25% 27%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 18%;
+    --popover-foreground: 215 25% 27%;
 
-    /* Warmer, friendlier primary - soft blue */
-    --primary: 217 91% 60%;
+    /* Warm, friendly primary - sophisticated blue-purple */
+    --primary: 250 84% 54%;
     --primary-foreground: 0 0% 100%;
+    --primary-variant: 250 84% 64%;
     
-    /* Warm success green */
-    --success: 142 69% 58%;
+    /* Vibrant success - modern green */
+    --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
     
-    /* Encouraging warm orange */
-    --orange-accent: 27 96% 61%;
+    /* Warm accent - friendly orange */
+    --orange-accent: 25 95% 53%;
     --orange-accent-foreground: 0 0% 100%;
     
-    /* Soft purple accent */
-    --purple-accent: 259 94% 51%;
+    /* Modern purple accent */
+    --purple-accent: 269 87% 66%;
     --purple-accent-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 9% 46%;
+    /* Sophisticated secondary */
+    --secondary: 215 16% 95%;
+    --secondary-foreground: 215 25% 27%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    /* Refined muted tones */
+    --muted: 215 16% 96.5%;
+    --muted-foreground: 215 13% 54%;
 
-    --accent: 220 14% 96%;
-    --accent-foreground: 220 13% 18%;
+    /* Subtle accent */
+    --accent: 215 20% 94%;
+    --accent-foreground: 215 25% 27%;
 
-    --destructive: 0 84% 60%;
+    /* Modern destructive */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 217 91% 60%;
+    /* Clean borders and inputs */
+    --border: 215 12% 89%;
+    --input: 215 12% 89%;
+    --ring: 250 84% 54%;
 
+    /* Modern radius for contemporary feel */
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Sidebar colors for modern navigation */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 25% 27%;
+    --sidebar-primary: 250 84% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 20% 94%;
+    --sidebar-accent-foreground: 215 25% 27%;
+    --sidebar-border: 215 12% 89%;
+    --sidebar-ring: 250 84% 54%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Chart colors for data visualization */
+    --chart-1: 250 84% 54%;
+    --chart-2: 142 76% 36%;
+    --chart-3: 25 95% 53%;
+    --chart-4: 269 87% 66%;
+    --chart-5: 215 25% 27%;
   }
 
   .dark {
-    --background: 220 13% 18%;
-    --foreground: 220 14% 96%;
+    /* Dark mode with warm undertones */
+    --background: 215 28% 9%;
+    --foreground: 213 31% 91%;
 
-    --card: 220 13% 18%;
-    --card-foreground: 220 14% 96%;
+    --card: 215 28% 10%;
+    --card-foreground: 213 31% 91%;
 
-    --popover: 220 13% 18%;
-    --popover-foreground: 220 14% 96%;
+    --popover: 215 28% 10%;
+    --popover-foreground: 213 31% 91%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 220 13% 18%;
-    
+    /* Brighter primary for dark mode */
+    --primary: 250 84% 60%;
+    --primary-foreground: 215 28% 9%;
+    --primary-variant: 250 84% 70%;
+
     --success: 142 69% 58%;
-    --success-foreground: 0 0% 100%;
-    
-    --orange-accent: 27 96% 61%;
-    --orange-accent-foreground: 0 0% 100%;
-    
-    --purple-accent: 259 94% 51%;
-    --purple-accent-foreground: 0 0% 100%;
+    --success-foreground: 215 28% 9%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --orange-accent: 25 95% 58%;
+    --orange-accent-foreground: 215 28% 9%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --purple-accent: 269 87% 72%;
+    --purple-accent-foreground: 215 28% 9%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --secondary: 215 28% 14%;
+    --secondary-foreground: 213 31% 91%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --muted: 215 28% 14%;
+    --muted-foreground: 215 15% 57.5%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --accent: 215 28% 14%;
+    --accent-foreground: 213 31% 91%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 213 31% 91%;
+
+    --border: 215 28% 18%;
+    --input: 215 28% 18%;
+    --ring: 250 84% 60%;
+
+    --sidebar-background: 215 28% 10%;
+    --sidebar-foreground: 213 31% 91%;
+    --sidebar-primary: 250 84% 60%;
+    --sidebar-primary-foreground: 215 28% 9%;
+    --sidebar-accent: 215 28% 14%;
+    --sidebar-accent-foreground: 213 31% 91%;
+    --sidebar-border: 215 28% 18%;
+    --sidebar-ring: 250 84% 60%;
+
+    --chart-1: 250 84% 60%;
+    --chart-2: 142 69% 58%;
+    --chart-3: 25 95% 58%;
+    --chart-4: 269 87% 72%;
+    --chart-5: 213 31% 91%;
   }
 }
 
@@ -165,12 +184,13 @@ All colors MUST be HSL.
     box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.15), 0 16px 40px -12px rgba(0, 0, 0, 0.2);
   }
   
+  /* Modern gradient backgrounds */
   .gradient-warm {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.05) 0%, hsl(var(--orange-accent) / 0.05) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, hsl(var(--orange-accent) / 0.03) 50%, hsl(var(--purple-accent) / 0.02) 100%);
   }
   
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--purple-accent)) 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-variant)) 100%);
   }
   
   /* Custom animations for progress */
