@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,17 @@ import { ArrowLeft, ArrowRight, Calculator, FlaskConical, Palette, PenTool, Brie
 const QuestionnairePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if user is authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/auth');
+      }
+    };
+    checkAuth();
+  }, [navigate]);
   
   // Current step state
   const [currentStep, setCurrentStep] = useState(1);
@@ -169,15 +180,37 @@ const QuestionnairePage = () => {
     } else if (currentStep === 5) {
       if (answers.academicStrengths.length === 0) return;
       
-      // Questionnaire complete, generate recommendations
+      // Questionnaire complete, save and generate recommendations
       setIsLoading(true);
       try {
+        // Check if user is authenticated
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          navigate('/auth');
+          return;
+        }
+
         const finalAnswers = {
           ...answers,
           interests: selectedSubjects,
           academicStrengths: answers.academicStrengths
         };
 
+        // Save questionnaire response to database
+        const { data: questionnaireResponse, error: saveError } = await supabase
+          .from('questionnaire_responses')
+          .insert({
+            user_id: user.id,
+            answers: finalAnswers
+          })
+          .select()
+          .single();
+
+        if (saveError) {
+          throw new Error(saveError.message);
+        }
+
+        // Generate AI recommendations
         const response = await supabase.functions.invoke('generate-recommendations', {
           body: { answers: finalAnswers }
         });
@@ -186,11 +219,26 @@ const QuestionnairePage = () => {
           throw new Error(response.error.message);
         }
 
+        // Save recommendations to database
+        const { error: recommendationError } = await supabase
+          .from('recommendations')
+          .insert({
+            user_id: user.id,
+            questionnaire_response_id: questionnaireResponse.id,
+            recommendations: response.data
+          });
+
+        if (recommendationError) {
+          console.error('Error saving recommendations:', recommendationError);
+          // Don't fail the whole flow if saving recommendations fails
+        }
+
         // Navigate to results with the recommendations
         navigate('/results', { 
           state: { 
             recommendations: response.data,
-            answers: finalAnswers
+            answers: finalAnswers,
+            responseId: questionnaireResponse.id
           } 
         });
       } catch (error) {

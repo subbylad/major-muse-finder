@@ -1,17 +1,100 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { GraduationCap, Target, Compass, Users } from "lucide-react";
+import { GraduationCap, Target, Compass, Users, History, User, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const navigate = useNavigate();
-  
+  const { toast } = useToast();
+  const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check current session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+      setIsLoading(false);
+    };
+
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const handleGetStarted = () => {
-    navigate("/auth");
+    if (user) {
+      navigate("/questionnaire");
+    } else {
+      navigate("/auth");
+    }
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You've been successfully signed out",
+      });
+    }
   };
 
   return (
     <div className="min-h-screen gradient-warm">
+      {/* Navigation */}
+      {!isLoading && (
+        <div className="container mx-auto px-4 sm:px-6 py-6">
+          <div className="flex justify-end gap-4">
+            {user ? (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate("/history")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <History className="w-4 h-4 mr-2" />
+                  History
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleSignOut}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/auth")}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="max-w-5xl mx-auto text-center">
@@ -41,9 +124,10 @@ const Index = () => {
           <Button 
             onClick={handleGetStarted}
             className="w-full sm:w-auto min-h-[56px] sm:min-h-[64px] gradient-primary text-white px-8 sm:px-12 py-4 sm:py-8 text-lg sm:text-xl font-semibold rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-large hover:shadow-xl border-0 touch-manipulation ripple"
+            disabled={isLoading}
           >
             <Target className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-            Get Started
+            {user ? "Continue Journey" : "Get Started"}
           </Button>
         </div>
         

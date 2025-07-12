@@ -77,7 +77,7 @@ const ResultsPage = () => {
       title: "🎉 Results saved!",
       description: "Your major recommendations have been saved to your profile.",
     });
-    // TODO: Implement actual saving logic
+    // Results are already saved in the database when generated
   };
 
   const handleShare = () => {

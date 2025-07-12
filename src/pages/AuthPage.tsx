@@ -1,226 +1,300 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Compass, Mail, Lock, ArrowLeft } from "lucide-react";
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    displayName: ""
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
   
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    displayName: ""
+  });
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/questionnaire");
+      }
+    };
+    checkUser();
+  }, [navigate]);
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    
+    const newErrors = {
+      email: "",
+      password: "",
+      confirmPassword: "",
+      displayName: ""
+    };
+
     // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
       newErrors.email = "Email is required";
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
     }
-    
+
     // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-    
-    // Confirm password validation (only for sign up)
+
+    // Sign up specific validations
     if (isSignUp) {
+      if (!formData.displayName) {
+        newErrors.displayName = "Display name is required";
+      }
+      
       if (!formData.confirmPassword) {
         newErrors.confirmPassword = "Please confirm your password";
       } else if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Passwords do not match";
+        newErrors.confirmPassword = "Passwords don't match";
       }
     }
-    
+
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.values(newErrors).every(error => error === "");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
     
-    // Mock authentication delay
-    setTimeout(() => {
-      setIsLoading(false);
-      
+    try {
       if (isSignUp) {
-        toast({
-          title: "Account created successfully!",
-          description: "Welcome to Align. Let's discover your ideal major.",
+        const { error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              display_name: formData.displayName
+            }
+          }
         });
-        // Navigate to questionnaire after signup
+
+        if (error) throw error;
+
+        toast({
+          title: "Account created!",
+          description: "Please check your email to verify your account.",
+        });
+        
+        // Navigate to questionnaire
         navigate("/questionnaire");
       } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (error) throw error;
+
         toast({
           title: "Welcome back!",
-          description: "You've been signed in successfully.",
+          description: "You've successfully signed in.",
         });
-        // For existing users, go to profile (or questionnaire if no previous results)
+        
         navigate("/questionnaire");
       }
-    }, 1500);
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred during authentication",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
+    if (errors[field as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-orange-accent/5 flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md">{/* Reduced from max-w-lg for better mobile experience */}
-        {/* Header - Mobile Optimized */}
-        <div className="text-center mb-6 sm:mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="mb-4 sm:mb-6 text-muted-foreground hover:text-foreground min-h-[44px] px-4 touch-manipulation"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-          
-          <div className="flex justify-center mb-3 sm:mb-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center">
-              <Compass className="w-7 h-7 sm:w-8 sm:h-8 text-primary-foreground" />
-            </div>
-          </div>
-          
-          <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-orange-accent bg-clip-text text-transparent">
-            Join Align
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-2 px-2">
-            {isSignUp ? "Create your account to get started" : "Welcome back to your journey"}
-          </p>
-        </div>
+    <div className="min-h-screen gradient-warm flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className="mb-6 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
 
-        {/* Auth Form */}
-        <Card className="border-primary/10 shadow-lg">
-          <CardHeader className="text-center">
-            <CardTitle>{isSignUp ? "Create Account" : "Sign In"}</CardTitle>
-            <CardDescription>
+        <Card className="shadow-large border-primary/10">
+          <CardHeader className="text-center pb-8">
+            <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <User className="w-8 h-8 text-white" />
+            </div>
+            <CardTitle className="text-2xl font-bold">
+              {isSignUp ? "Create Your Account" : "Welcome Back"}
+            </CardTitle>
+            <p className="text-muted-foreground">
               {isSignUp 
-                ? "Start discovering your ideal college major" 
-                : "Continue your journey of discovery"
+                ? "Start your journey to discover your perfect major" 
+                : "Sign in to continue your career exploration"
               }
-            </CardDescription>
+            </p>
           </CardHeader>
-          
+
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-4">
-              {/* Email Field - Mobile Optimized */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                <label className="text-sm font-medium">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="email"
                     type="email"
-                    placeholder="your.email@university.edu"
+                    placeholder="Enter your email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className={`pl-10 h-12 text-base ${errors.email ? "border-destructive" : ""} touch-manipulation`}
-                    disabled={isLoading}
+                    className="pl-10"
                   />
                 </div>
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email}</p>
+                )}
               </div>
 
-              {/* Password Field - Mobile Optimized */}
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
-                    className={`pl-10 h-12 text-base ${errors.password ? "border-destructive" : ""} touch-manipulation`}
-                    disabled={isLoading}
-                  />
-                </div>
-                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-              </div>
-
-              {/* Confirm Password Field (Sign Up Only) - Mobile Optimized */}
+              {/* Display Name Field (Sign Up Only) */}
               {isSignUp && (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
+                  <label className="text-sm font-medium">Display Name</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirm your password"
-                      value={formData.confirmPassword}
-                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                      className={`pl-10 h-12 text-base ${errors.confirmPassword ? "border-destructive" : ""} touch-manipulation`}
-                      disabled={isLoading}
+                      type="text"
+                      placeholder="How should we call you?"
+                      value={formData.displayName}
+                      onChange={(e) => handleInputChange("displayName", e.target.value)}
+                      className="pl-10"
                     />
                   </div>
-                  {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
+                  {errors.displayName && (
+                    <p className="text-sm text-destructive">{errors.displayName}</p>
+                  )}
                 </div>
               )}
 
-              {/* Submit Button - Mobile Optimized */}
-              <Button 
-                type="submit" 
-                className="w-full min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground text-base font-medium touch-manipulation"
+              {/* Password Field */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    className="pl-10 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password}</p>
+                )}
+              </div>
+
+              {/* Confirm Password Field (Sign Up Only) */}
+              {isSignUp && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Confirm Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm your password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                      className="pl-10 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="w-full gradient-primary text-white py-6 text-lg font-semibold"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
-                    {isSignUp ? "Creating Account..." : "Signing In..."}
-                  </div>
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {isSignUp ? "Creating account..." : "Signing in..."}
+                  </>
                 ) : (
                   isSignUp ? "Create Account" : "Sign In"
                 )}
               </Button>
-            </form>
 
-            {/* Toggle Sign In/Sign Up - Mobile Optimized */}
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-                <button
+              {/* Toggle Sign Up/Sign In */}
+              <div className="text-center">
+                <p className="text-muted-foreground">
+                  {isSignUp ? "Already have an account?" : "Don't have an account?"}
+                </p>
+                <Button
                   type="button"
-                  onClick={() => {
-                    setIsSignUp(!isSignUp);
-                    setFormData({ email: "", password: "", confirmPassword: "" });
-                    setErrors({});
-                  }}
-                  className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline min-h-[44px] inline-flex items-center px-2 touch-manipulation"
+                  variant="link"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="font-semibold text-primary"
                   disabled={isLoading}
                 >
-                  {isSignUp ? "Sign in" : "Sign up"}
-                </button>
-              </p>
-            </div>
+                  {isSignUp ? "Sign in here" : "Create one here"}
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
       </div>
