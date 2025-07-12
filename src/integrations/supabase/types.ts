@@ -43,21 +43,42 @@ export type Database = {
       }
       questionnaire_responses: {
         Row: {
-          answers: Json
-          completed_at: string
+          completed_at: string | null
+          created_at: string
           id: string
+          is_completed: boolean
+          question_1_interests: Json | null
+          question_2_work_style: string | null
+          question_3_skills: Json | null
+          question_4_values: Json | null
+          question_5_academic_strengths: Json | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          answers: Json
-          completed_at?: string
+          completed_at?: string | null
+          created_at?: string
           id?: string
+          is_completed?: boolean
+          question_1_interests?: Json | null
+          question_2_work_style?: string | null
+          question_3_skills?: Json | null
+          question_4_values?: Json | null
+          question_5_academic_strengths?: Json | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          answers?: Json
-          completed_at?: string
+          completed_at?: string | null
+          created_at?: string
           id?: string
+          is_completed?: boolean
+          question_1_interests?: Json | null
+          question_2_work_style?: string | null
+          question_3_skills?: Json | null
+          question_4_values?: Json | null
+          question_5_academic_strengths?: Json | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

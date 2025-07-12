@@ -14,22 +14,65 @@ import { ArrowLeft, ArrowRight, Calculator, FlaskConical, Palette, PenTool, Brie
 const QuestionnairePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Check if user is authenticated
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/auth');
-      }
-    };
-    checkAuth();
-  }, [navigate]);
   
   // Current step state
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
   const [isLoading, setIsLoading] = useState(false);
+  const [responseId, setResponseId] = useState<string | null>(null);
+  const [isResumingProgress, setIsResumingProgress] = useState(true);
+
+  // Check if user is authenticated and load any existing progress
+  useEffect(() => {
+    const checkAuthAndLoadProgress = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/auth');
+        return;
+      }
+
+      // Check for existing incomplete response
+      const { data: existingResponse } = await supabase
+        .from('questionnaire_responses')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_completed', false)
+        .maybeSingle();
+
+      if (existingResponse) {
+        // Resume existing progress
+        setResponseId(existingResponse.id);
+        loadProgressFromResponse(existingResponse);
+        toast({
+          title: "Resuming your progress",
+          description: "We found your previous questionnaire progress!",
+        });
+      } else {
+        // Create new response
+        const { data: newResponse, error } = await supabase
+          .from('questionnaire_responses')
+          .insert({ user_id: user.id })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error creating response:', error);
+          toast({
+            title: "Error",
+            description: "Failed to start questionnaire. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setResponseId(newResponse.id);
+      }
+      
+      setIsResumingProgress(false);
+    };
+    
+    checkAuthAndLoadProgress();
+  }, [navigate, toast]);
   
   // All answers storage
   const [answers, setAnswers] = useState({
@@ -151,6 +194,56 @@ const QuestionnairePage = () => {
     });
   };
 
+  // Load progress from existing response
+  const loadProgressFromResponse = (response: any) => {
+    let step = 1;
+    
+    if (response.question_1_interests) {
+      setSelectedSubjects(response.question_1_interests);
+      setAnswers(prev => ({ ...prev, interests: response.question_1_interests }));
+      step = 2;
+    }
+    
+    if (response.question_2_work_style) {
+      setAnswers(prev => ({ ...prev, workStyle: response.question_2_work_style }));
+      step = 3;
+    }
+    
+    if (response.question_3_skills) {
+      setAnswers(prev => ({ ...prev, skillsConfidence: response.question_3_skills }));
+      step = 4;
+    }
+    
+    if (response.question_4_values) {
+      setAnswers(prev => ({ ...prev, careerValues: response.question_4_values }));
+      step = 5;
+    }
+    
+    if (response.question_5_academic_strengths) {
+      setAnswers(prev => ({ ...prev, academicStrengths: response.question_5_academic_strengths }));
+    }
+    
+    setCurrentStep(step);
+  };
+
+  // Save progress to database
+  const saveProgress = async (stepData: any) => {
+    if (!responseId) return;
+
+    try {
+      const { error } = await supabase
+        .from('questionnaire_responses')
+        .update(stepData)
+        .eq('id', responseId);
+
+      if (error) {
+        console.error('Error saving progress:', error);
+      }
+    } catch (error) {
+      console.error('Error saving progress:', error);
+    }
+  };
+
   const handleAcademicStrengthToggle = (strengthId: string) => {
     setAnswers(prev => ({
       ...prev,
@@ -164,23 +257,37 @@ const QuestionnairePage = () => {
     if (currentStep === 1) {
       if (selectedSubjects.length === 0) return;
       
-      // Save subjects and move to next question with animation
-      setAnswers(prev => ({ ...prev, interests: selectedSubjects }));
+      // Save subjects and move to next question
+      const updatedAnswers = { ...answers, interests: selectedSubjects };
+      setAnswers(updatedAnswers);
+      
+      // Save to database
+      await saveProgress({ question_1_interests: selectedSubjects });
+      
       setTimeout(() => setCurrentStep(2), 100);
     } else if (currentStep === 2) {
       if (!answers.workStyle) return;
       
+      // Save work style to database
+      await saveProgress({ question_2_work_style: answers.workStyle });
+      
       setTimeout(() => setCurrentStep(3), 100);
     } else if (currentStep === 3) {
+      // Save skills to database
+      await saveProgress({ question_3_skills: answers.skillsConfidence });
+      
       setTimeout(() => setCurrentStep(4), 100);
     } else if (currentStep === 4) {
       if (answers.careerValues.length === 0) return;
+      
+      // Save career values to database
+      await saveProgress({ question_4_values: answers.careerValues });
       
       setTimeout(() => setCurrentStep(5), 100);
     } else if (currentStep === 5) {
       if (answers.academicStrengths.length === 0) return;
       
-      // Questionnaire complete, save and generate recommendations
+      // Questionnaire complete, save final answer and generate recommendations
       setIsLoading(true);
       try {
         // Check if user is authenticated
@@ -196,18 +303,18 @@ const QuestionnairePage = () => {
           academicStrengths: answers.academicStrengths
         };
 
-        // Save questionnaire response to database
-        const { data: questionnaireResponse, error: saveError } = await supabase
+        // Save final answer and mark as completed
+        const { error: updateError } = await supabase
           .from('questionnaire_responses')
-          .insert({
-            user_id: user.id,
-            answers: finalAnswers
+          .update({
+            question_5_academic_strengths: answers.academicStrengths,
+            is_completed: true,
+            completed_at: new Date().toISOString()
           })
-          .select()
-          .single();
+          .eq('id', responseId);
 
-        if (saveError) {
-          throw new Error(saveError.message);
+        if (updateError) {
+          throw new Error(updateError.message);
         }
 
         // Generate AI recommendations
@@ -224,7 +331,7 @@ const QuestionnairePage = () => {
           .from('recommendations')
           .insert({
             user_id: user.id,
-            questionnaire_response_id: questionnaireResponse.id,
+            questionnaire_response_id: responseId,
             recommendations: response.data
           });
 
@@ -238,7 +345,7 @@ const QuestionnairePage = () => {
           state: { 
             recommendations: response.data,
             answers: finalAnswers,
-            responseId: questionnaireResponse.id
+            responseId: responseId
           } 
         });
       } catch (error) {
@@ -277,6 +384,18 @@ const QuestionnairePage = () => {
   };
 
   const progressPercentage = (currentStep / totalSteps) * 100;
+
+  // Show loading state while checking for existing progress
+  if (isResumingProgress) {
+    return (
+      <div className="min-h-screen gradient-warm flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading your questionnaire...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">

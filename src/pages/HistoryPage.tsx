@@ -42,12 +42,18 @@ const HistoryPage = () => {
         .select(`
           id,
           completed_at,
-          answers,
+          question_1_interests,
+          question_2_work_style,
+          question_3_skills,
+          question_4_values,
+          question_5_academic_strengths,
+          is_completed,
           recommendations (
             recommendations
           )
         `)
         .eq('user_id', userId)
+        .eq('is_completed', true)
         .order('completed_at', { ascending: false });
 
       if (error) throw error;
@@ -56,7 +62,15 @@ const HistoryPage = () => {
         ...response,
         recommendations: Array.isArray(response.recommendations?.[0]?.recommendations) 
           ? response.recommendations[0].recommendations 
-          : []
+          : [],
+        // Reconstruct answers object from individual columns for compatibility
+        answers: {
+          interests: response.question_1_interests || [],
+          workStyle: response.question_2_work_style || "",
+          skillsConfidence: response.question_3_skills || {},
+          careerValues: response.question_4_values || [],
+          academicStrengths: response.question_5_academic_strengths || []
+        }
       }));
 
       setResponses(formattedData);
