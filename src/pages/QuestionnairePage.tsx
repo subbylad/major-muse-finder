@@ -195,52 +195,52 @@ const QuestionnairePage = () => {
       {/* Subtle Background Pattern */}
       <div className="absolute inset-0 gradient-warm"></div>
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-40 right-20 w-48 h-48 bg-orange-accent/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-purple-accent/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-1/3 w-36 h-36 bg-success/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 left-5 sm:left-10 w-24 h-24 sm:w-32 sm:h-32 bg-primary/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-32 sm:top-40 right-10 sm:right-20 w-36 h-36 sm:w-48 sm:h-48 bg-orange-accent/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-32 sm:bottom-40 left-1/4 w-30 h-30 sm:w-40 sm:h-40 bg-purple-accent/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-16 sm:bottom-20 right-1/3 w-28 h-28 sm:w-36 sm:h-36 bg-success/10 rounded-full blur-3xl"></div>
       </div>
       
-      <div className="relative z-10 py-8 px-6">
+      <div className="relative z-10 py-6 sm:py-8 px-4 sm:px-6">
       <div className="container mx-auto max-w-3xl">
-        {/* Header with back button */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Header with back button - Mobile Optimized */}
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
           <Button
             variant="ghost"
             onClick={handleBack}
-            className="text-muted-foreground hover:text-foreground rounded-xl px-4 py-3"
+            className="text-muted-foreground hover:text-foreground rounded-xl px-3 sm:px-4 py-3 min-h-[44px] touch-manipulation"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
           
-          <div className="text-lg font-medium text-muted-foreground">
+          <div className="text-sm sm:text-lg font-medium text-muted-foreground">
             Question {currentStep} of {totalSteps}
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mb-16">
+        {/* Progress Bar - Mobile Optimized */}
+        <div className="mb-12 sm:mb-16">
           {/* Progress Header */}
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-foreground mb-2">Your Progress</h3>
-            <p className="text-lg text-muted-foreground">
+          <div className="text-center mb-6 sm:mb-8">
+            <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Your Progress</h3>
+            <p className="text-sm sm:text-lg text-muted-foreground">
               Step {currentStep} of {totalSteps} • {Math.round(progressPercentage)}% Complete
             </p>
           </div>
           
-          {/* Visual Progress Steps */}
+          {/* Visual Progress Steps - Mobile Optimized */}
           <div className="relative max-w-2xl mx-auto">
             {/* Progress Line Background */}
-            <div className="absolute top-8 left-0 right-0 h-1 bg-border rounded-full mx-8"></div>
+            <div className="absolute top-6 sm:top-8 left-0 right-0 h-0.5 sm:h-1 bg-border rounded-full mx-6 sm:mx-8"></div>
             
             {/* Animated Progress Line */}
             <div 
-              className="absolute top-8 left-0 h-1 bg-gradient-to-r from-primary to-purple-accent rounded-full mx-8 transition-all duration-700 ease-out"
-              style={{ width: `calc(${progressPercentage}% - 64px)` }}
+              className="absolute top-6 sm:top-8 left-0 h-0.5 sm:h-1 bg-gradient-to-r from-primary to-purple-accent rounded-full mx-6 sm:mx-8 transition-all duration-700 ease-out"
+              style={{ width: `calc(${progressPercentage}% - 48px)` }}
             ></div>
             
-            {/* Step Circles */}
+            {/* Step Circles - Mobile Optimized */}
             <div className="flex justify-between relative z-10">
               {Array.from({ length: totalSteps }, (_, index) => {
                 const stepNumber = index + 1;
@@ -255,9 +255,9 @@ const QuestionnairePage = () => {
                       isCurrent ? 'scale-110' : ''
                     }`}
                   >
-                    {/* Step Circle */}
+                    {/* Step Circle - Mobile Optimized */}
                     <div
-                      className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-lg border-4 transition-all duration-500 ${
+                      className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center font-bold text-sm sm:text-lg border-2 sm:border-4 transition-all duration-500 ${
                         isCompleted
                           ? 'bg-success text-success-foreground border-success shadow-lg'
                           : isCurrent
@@ -266,7 +266,7 @@ const QuestionnairePage = () => {
                       }`}
                     >
                       {isCompleted ? (
-                        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-5 h-5 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       ) : (
@@ -274,11 +274,11 @@ const QuestionnairePage = () => {
                       )}
                     </div>
                     
-                    {/* Step Label */}
-                    <div className={`mt-3 text-center transition-all duration-300 ${
+                    {/* Step Label - Mobile Optimized */}
+                    <div className={`mt-2 sm:mt-3 text-center transition-all duration-300 ${
                       isCurrent ? 'text-primary font-semibold' : 'text-muted-foreground'
                     }`}>
-                      <div className="text-sm font-medium">
+                      <div className="text-xs sm:text-sm font-medium">
                         {stepNumber === 1 && 'Interests'}
                         {stepNumber === 2 && 'Work Style'}
                         {stepNumber === 3 && 'Skills'}
@@ -287,11 +287,11 @@ const QuestionnairePage = () => {
                       </div>
                     </div>
                     
-                    {/* Completion Sparkle Effect */}
+                    {/* Completion Sparkle Effect - Mobile Optimized */}
                     {isCompleted && (
-                      <div className="absolute -top-2 -right-2 w-6 h-6 animate-bounce">
+                      <div className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 w-4 h-4 sm:w-6 sm:h-6 animate-bounce">
                         <div className="w-full h-full bg-orange-accent rounded-full flex items-center justify-center">
-                          <svg className="w-3 h-3 text-orange-accent-foreground" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-2 h-2 sm:w-3 sm:h-3 text-orange-accent-foreground" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                           </svg>
                         </div>
@@ -303,72 +303,72 @@ const QuestionnairePage = () => {
             </div>
           </div>
           
-          {/* Encouraging Message */}
-          <div className="text-center mt-8">
+          {/* Encouraging Message - Mobile Optimized */}
+          <div className="text-center mt-6 sm:mt-8">
             {currentStep === 1 && (
-              <p className="text-muted-foreground">🚀 Let's discover your interests!</p>
+              <p className="text-sm sm:text-base text-muted-foreground">🚀 Let's discover your interests!</p>
             )}
             {currentStep === 2 && (
-              <p className="text-muted-foreground">💪 Great start! Now about your work style...</p>
+              <p className="text-sm sm:text-base text-muted-foreground">💪 Great start! Now about your work style...</p>
             )}
             {currentStep === 3 && (
-              <p className="text-muted-foreground">⭐ Awesome! Let's explore your skills...</p>
+              <p className="text-sm sm:text-base text-muted-foreground">⭐ Awesome! Let's explore your skills...</p>
             )}
             {currentStep === 4 && (
-              <p className="text-muted-foreground">🎯 Amazing progress! What drives you?</p>
+              <p className="text-sm sm:text-base text-muted-foreground">🎯 Amazing progress! What drives you?</p>
             )}
             {currentStep === 5 && (
-              <p className="text-muted-foreground">🏆 Almost there! Your academic strengths...</p>
+              <p className="text-sm sm:text-base text-muted-foreground">🏆 Almost there! Your academic strengths...</p>
             )}
           </div>
         </div>
 
-        {/* Question Card */}
-        <Card className="border-primary/10 shadow-large mb-8 rounded-3xl bg-white/90 backdrop-blur-sm">
+        {/* Question Card - Mobile Optimized */}
+        <Card className="border-primary/10 shadow-large mb-6 sm:mb-8 rounded-3xl bg-white/90 backdrop-blur-sm">
           {currentStep === 1 && (
             <>
-              <CardHeader className="pb-12">
-                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
+              <CardHeader className="pb-8 sm:pb-12 px-4 sm:px-6">
+                <CardTitle className="text-2xl sm:text-3xl md:text-4xl text-center font-bold mb-4 sm:mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
                   What subjects excite you most?
                 </CardTitle>
-                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
+                <p className="text-center text-muted-foreground text-base sm:text-xl leading-relaxed max-w-2xl mx-auto px-2">
                   Select all that apply. Choose the subjects that genuinely interest and energize you.
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-6 px-8 pb-8">
+              <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-8 pb-6 sm:pb-8">
                 {subjectOptions.map((option) => (
                   <div
                     key={option.id}
-                    className={`group flex items-start space-x-5 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large ${
+                    className={`group flex items-start space-x-3 sm:space-x-5 p-4 sm:p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.01] sm:hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large min-h-[80px] touch-manipulation ${
                       selectedSubjects.includes(option.id)
                         ? "border-primary bg-primary/10 shadow-medium scale-[1.01]"
                         : "border-border hover:border-primary/30"
                     }`}
                     onClick={() => handleSubjectToggle(option.id)}
                   >
-                    {/* Icon */}
-                    <div className={`p-3 rounded-xl transition-all duration-300 ${
+                    {/* Icon - Mobile Optimized */}
+                    <div className={`p-2 sm:p-3 rounded-xl transition-all duration-300 ${
                       selectedSubjects.includes(option.id)
                         ? "bg-primary text-primary-foreground shadow-soft"
                         : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
                     }`}>
-                      <option.icon className="w-6 h-6" />
+                      <option.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <Checkbox
                       id={option.id}
                       checked={selectedSubjects.includes(option.id)}
                       onCheckedChange={() => handleSubjectToggle(option.id)}
-                      className="mt-1"
+                      className="mt-1 min-w-[20px] min-h-[20px]"
                     />
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-xl mb-2 block"
+                        className="font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-lg sm:text-xl mb-1 sm:mb-2 block"
                       >
                         {option.label}
                       </label>
-                      <p className="text-muted-foreground leading-relaxed text-lg">
+                      <p className="text-muted-foreground leading-relaxed text-sm sm:text-lg">
                         {option.description}
                       </p>
                     </div>

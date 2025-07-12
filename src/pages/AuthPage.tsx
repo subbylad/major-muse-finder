@@ -89,29 +89,29 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-orange-accent/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-orange-accent/5 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md">{/* Reduced from max-w-lg for better mobile experience */}
+        {/* Header - Mobile Optimized */}
+        <div className="text-center mb-6 sm:mb-8">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
-            className="mb-6 text-muted-foreground hover:text-foreground"
+            className="mb-4 sm:mb-6 text-muted-foreground hover:text-foreground min-h-[44px] px-4 touch-manipulation"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Button>
           
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-              <Compass className="w-8 h-8 text-primary-foreground" />
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center">
+              <Compass className="w-7 h-7 sm:w-8 sm:h-8 text-primary-foreground" />
             </div>
           </div>
           
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-orange-accent bg-clip-text text-transparent">
+          <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-orange-accent bg-clip-text text-transparent">
             Join Align
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-sm sm:text-base text-muted-foreground mt-2 px-2">
             {isSignUp ? "Create your account to get started" : "Welcome back to your journey"}
           </p>
         </div>
@@ -129,56 +129,56 @@ const AuthPage = () => {
           </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email Field */}
+            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-4">
+              {/* Email Field - Mobile Optimized */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="your.email@university.edu"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
+                    className={`pl-10 h-12 text-base ${errors.email ? "border-destructive" : ""} touch-manipulation`}
                     disabled={isLoading}
                   />
                 </div>
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
 
-              {/* Password Field */}
+              {/* Password Field - Mobile Optimized */}
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
-                    className={`pl-10 ${errors.password ? "border-destructive" : ""}`}
+                    className={`pl-10 h-12 text-base ${errors.password ? "border-destructive" : ""} touch-manipulation`}
                     disabled={isLoading}
                   />
                 </div>
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
 
-              {/* Confirm Password Field (Sign Up Only) */}
+              {/* Confirm Password Field (Sign Up Only) - Mobile Optimized */}
               {isSignUp && (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="confirmPassword"
                       type="password"
                       placeholder="Confirm your password"
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                      className={`pl-10 ${errors.confirmPassword ? "border-destructive" : ""}`}
+                      className={`pl-10 h-12 text-base ${errors.confirmPassword ? "border-destructive" : ""} touch-manipulation`}
                       disabled={isLoading}
                     />
                   </div>
@@ -186,10 +186,10 @@ const AuthPage = () => {
                 </div>
               )}
 
-              {/* Submit Button */}
+              {/* Submit Button - Mobile Optimized */}
               <Button 
                 type="submit" 
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="w-full min-h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground text-base font-medium touch-manipulation"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -203,7 +203,7 @@ const AuthPage = () => {
               </Button>
             </form>
 
-            {/* Toggle Sign In/Sign Up */}
+            {/* Toggle Sign In/Sign Up - Mobile Optimized */}
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
                 {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
@@ -214,7 +214,7 @@ const AuthPage = () => {
                     setFormData({ email: "", password: "", confirmPassword: "" });
                     setErrors({});
                   }}
-                  className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline"
+                  className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline min-h-[44px] inline-flex items-center px-2 touch-manipulation"
                   disabled={isLoading}
                 >
                   {isSignUp ? "Sign in" : "Sign up"}

@@ -143,6 +143,14 @@ All colors MUST be HSL.
   }
 }
 
+/* === UTILITY CLASSES === */
+
+/* Touch-friendly interactions */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Premium shadows and effects */
 @layer utilities {
   .shadow-soft {
@@ -179,5 +187,39 @@ All colors MUST be HSL.
   
   .animate-progress-pulse {
     animation: progressPulse 2s ease-in-out infinite;
+  }
+
+  /* Mobile-optimized button states */
+  @media (hover: hover) and (pointer: fine) {
+    .hover\:scale-105:hover {
+      transform: scale(1.05);
+    }
+    
+    .hover\:scale-\[1\.02\]:hover {
+      transform: scale(1.02);
+    }
+    
+    .hover\:scale-\[1\.01\]:hover {
+      transform: scale(1.01);
+    }
+  }
+}
+
+/* Ensure proper touch targets on mobile */
+@media (max-width: 640px) {
+  button, input, select, textarea, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve text readability on mobile */
+  html {
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Better touch feedback */
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 }

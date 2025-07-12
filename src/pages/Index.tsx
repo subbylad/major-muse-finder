@@ -13,88 +13,87 @@ const Index = () => {
   return (
     <div className="min-h-screen gradient-warm">
       {/* Hero Section */}
-      <div className="container mx-auto px-6 py-20">
+      <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="max-w-5xl mx-auto text-center">
           {/* Logo/Icon */}
-          <div className="mb-12 flex justify-center">
-            <div className="w-24 h-24 gradient-primary rounded-3xl flex items-center justify-center shadow-large">
-              <Compass className="w-12 h-12 text-white" />
+          <div className="mb-8 sm:mb-12 flex justify-center">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 gradient-primary rounded-3xl flex items-center justify-center shadow-large">
+              <Compass className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
             </div>
           </div>
           
           {/* Main Heading */}
-          <h1 className="font-bold mb-8 gradient-primary bg-clip-text text-transparent leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 gradient-primary bg-clip-text text-transparent leading-tight">
             Align
           </h1>
           
           {/* Subtitle */}
-          <h2 className="text-muted-foreground mb-6 max-w-3xl mx-auto leading-relaxed font-medium">
+          <h2 className="text-xl sm:text-2xl text-muted-foreground mb-4 sm:mb-6 max-w-3xl mx-auto leading-relaxed font-medium px-4">
             Discover your ideal college major through personalized questions that reveal your interests, skills, and aspirations
           </h2>
           
           {/* Additional description */}
-          <p className="text-lg text-muted-foreground/80 mb-16 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg text-muted-foreground/80 mb-12 sm:mb-16 max-w-2xl mx-auto leading-relaxed px-4">
             Take our comprehensive questionnaire and get matched with majors that align with your unique profile
           </p>
           
-          {/* CTA Button */}
+          {/* CTA Button - Mobile Optimized */}
           <Button 
             onClick={handleGetStarted}
-            size="lg"
-            className="gradient-primary text-white px-12 py-8 text-xl font-semibold rounded-2xl transition-all duration-300 hover:scale-105 shadow-large hover:shadow-xl border-0"
+            className="w-full sm:w-auto min-h-[56px] sm:min-h-[64px] gradient-primary text-white px-8 sm:px-12 py-4 sm:py-8 text-lg sm:text-xl font-semibold rounded-2xl transition-all duration-300 hover:scale-105 shadow-large hover:shadow-xl border-0 touch-manipulation"
           >
-            <Target className="w-6 h-6 mr-3" />
+            <Target className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
             Get Started
           </Button>
         </div>
         
-        {/* Feature Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mt-24 max-w-5xl mx-auto">
-          <Card className="p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border-primary/10 rounded-2xl bg-white/80 backdrop-blur-sm">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <GraduationCap className="w-8 h-8 text-primary" />
+        {/* Feature Cards - Mobile Optimized */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mt-16 sm:mt-24 max-w-5xl mx-auto">
+          <Card className="p-6 sm:p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border-primary/10 rounded-2xl bg-white/80 backdrop-blur-sm">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <GraduationCap className="w-7 h-7 sm:w-8 sm:h-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-4">Personalized Matching</h3>
-            <p className="text-muted-foreground leading-relaxed">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Personalized Matching</h3>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               Our algorithm analyzes your responses to suggest majors that fit your personality and goals
             </p>
           </Card>
           
-          <Card className="p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border-orange-accent/10 rounded-2xl bg-white/80 backdrop-blur-sm">
-            <div className="w-16 h-16 bg-orange-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Compass className="w-8 h-8 text-orange-accent" />
+          <Card className="p-6 sm:p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border-orange-accent/10 rounded-2xl bg-white/80 backdrop-blur-sm">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-orange-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Compass className="w-7 h-7 sm:w-8 sm:h-8 text-orange-accent" />
             </div>
-            <h3 className="text-xl font-semibold mb-4">Career Insights</h3>
-            <p className="text-muted-foreground leading-relaxed">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Career Insights</h3>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               Learn about potential career paths and opportunities for each recommended major
             </p>
           </Card>
           
-          <Card className="p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border-success/10 rounded-2xl bg-white/80 backdrop-blur-sm">
-            <div className="w-16 h-16 bg-success/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Users className="w-8 h-8 text-success" />
+          <Card className="p-6 sm:p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border-success/10 rounded-2xl bg-white/80 backdrop-blur-sm sm:col-span-2 md:col-span-1">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-success/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <Users className="w-7 h-7 sm:w-8 sm:h-8 text-success" />
             </div>
-            <h3 className="text-xl font-semibold mb-4">Trusted by Students</h3>
-            <p className="text-muted-foreground leading-relaxed">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Trusted by Students</h3>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               Join thousands of students who found their perfect academic path through Align
             </p>
           </Card>
         </div>
         
-        {/* Stats Section */}
-        <div className="mt-20 py-12 border-t border-border/50">
-          <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">50+</div>
-              <div className="text-muted-foreground">Major Options</div>
+        {/* Stats Section - Mobile Optimized */}
+        <div className="mt-16 sm:mt-20 py-8 sm:py-12 border-t border-border/50">
+          <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-3xl mx-auto text-center">
+            <div className="px-2">
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-1 sm:mb-2">50+</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Major Options</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-orange-accent mb-2">5 min</div>
-              <div className="text-muted-foreground">Quick Assessment</div>
+            <div className="px-2">
+              <div className="text-2xl sm:text-3xl font-bold text-orange-accent mb-1 sm:mb-2">5 min</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Quick Assessment</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-success mb-2">95%</div>
-              <div className="text-muted-foreground">Satisfaction Rate</div>
+            <div className="px-2">
+              <div className="text-2xl sm:text-3xl font-bold text-success mb-1 sm:mb-2">95%</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Satisfaction Rate</div>
             </div>
           </div>
         </div>
