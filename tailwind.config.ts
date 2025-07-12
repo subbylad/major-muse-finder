@@ -60,6 +60,10 @@ export default {
 					DEFAULT: 'hsl(var(--orange-accent))',
 					foreground: 'hsl(var(--orange-accent-foreground))'
 				},
+				'purple-accent': {
+					DEFAULT: 'hsl(var(--purple-accent))',
+					foreground: 'hsl(var(--purple-accent-foreground))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -74,7 +78,10 @@ export default {
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				xl: 'calc(var(--radius) + 4px)',
+				'2xl': 'calc(var(--radius) + 8px)',
+				'3xl': 'calc(var(--radius) + 12px)'
 			},
 			keyframes: {
 				'accordion-down': {

@@ -191,53 +191,53 @@ const QuestionnairePage = () => {
   const progressPercentage = (currentStep / totalSteps) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-orange-accent/5 p-4">
-      <div className="container mx-auto max-w-2xl">
+    <div className="min-h-screen gradient-warm py-8 px-6">
+      <div className="container mx-auto max-w-3xl">
         {/* Header with back button */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <Button
             variant="ghost"
             onClick={handleBack}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground rounded-xl px-4 py-3"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-5 h-5 mr-2" />
             Back
           </Button>
           
-          <div className="text-sm text-muted-foreground">
+          <div className="text-lg font-medium text-muted-foreground">
             Question {currentStep} of {totalSteps}
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-foreground">Progress</span>
-            <span className="text-sm text-muted-foreground">{Math.round(progressPercentage)}%</span>
+        <div className="mb-12">
+          <div className="flex justify-between items-center mb-3">
+            <span className="font-semibold text-foreground">Progress</span>
+            <span className="text-muted-foreground font-medium">{Math.round(progressPercentage)}%</span>
           </div>
-          <Progress value={progressPercentage} className="h-2" />
+          <Progress value={progressPercentage} className="h-3 rounded-full" />
         </div>
 
         {/* Question Card */}
-        <Card className="border-primary/10 shadow-lg mb-6">
+        <Card className="border-primary/10 shadow-large mb-8 rounded-3xl bg-white/90 backdrop-blur-sm">
           {currentStep === 1 && (
             <>
-              <CardHeader>
-                <CardTitle className="text-xl text-center">
+              <CardHeader className="pb-8">
+                <CardTitle className="text-2xl text-center font-semibold">
                   What subjects excite you most?
                 </CardTitle>
-                <p className="text-center text-muted-foreground">
+                <p className="text-center text-muted-foreground text-lg leading-relaxed">
                   Select all that apply. Choose the subjects that genuinely interest and energize you.
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 px-8 pb-8">
                 {subjectOptions.map((option) => (
                   <div
                     key={option.id}
-                    className={`flex items-start space-x-3 p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:border-primary/30 hover:bg-primary/5 ${
+                    className={`flex items-start space-x-4 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:bg-primary/5 hover:shadow-soft ${
                       selectedSubjects.includes(option.id)
-                        ? "border-primary bg-primary/10"
+                        ? "border-primary bg-primary/10 shadow-soft"
                         : "border-border"
                     }`}
                     onClick={() => handleSubjectToggle(option.id)}
@@ -251,11 +251,11 @@ const QuestionnairePage = () => {
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-lg"
                       >
                         {option.label}
                       </label>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-muted-foreground mt-2 leading-relaxed">
                         {option.description}
                       </p>
                     </div>
@@ -267,16 +267,16 @@ const QuestionnairePage = () => {
 
           {currentStep === 2 && (
             <>
-              <CardHeader>
-                <CardTitle className="text-xl text-center">
+              <CardHeader className="pb-8">
+                <CardTitle className="text-2xl text-center font-semibold">
                   How do you prefer to work?
                 </CardTitle>
-                <p className="text-center text-muted-foreground">
+                <p className="text-center text-muted-foreground text-lg leading-relaxed">
                   Select the working style that best describes your preference.
                 </p>
               </CardHeader>
               
-              <CardContent>
+              <CardContent className="space-y-4 px-8 pb-8">
                 <RadioGroup 
                   value={answers.workStyle} 
                   onValueChange={handleWorkStyleChange}
@@ -285,9 +285,9 @@ const QuestionnairePage = () => {
                   {workStyleOptions.map((option) => (
                     <div
                       key={option.id}
-                      className={`flex items-start space-x-3 p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:border-primary/30 hover:bg-primary/5 ${
+                      className={`flex items-start space-x-4 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:bg-primary/5 hover:shadow-soft ${
                         answers.workStyle === option.id
-                          ? "border-primary bg-primary/10"
+                          ? "border-primary bg-primary/10 shadow-soft"
                           : "border-border"
                       }`}
                       onClick={() => handleWorkStyleChange(option.id)}
@@ -300,11 +300,11 @@ const QuestionnairePage = () => {
                       <div className="flex-1">
                         <Label
                           htmlFor={option.id}
-                          className="text-sm font-medium leading-none cursor-pointer"
+                          className="font-medium leading-none cursor-pointer text-lg"
                         >
                           {option.label}
                         </Label>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-muted-foreground mt-2 leading-relaxed">
                           {option.description}
                         </p>
                       </div>
@@ -317,24 +317,24 @@ const QuestionnairePage = () => {
 
           {currentStep === 3 && (
             <>
-              <CardHeader>
-                <CardTitle className="text-xl text-center">
+              <CardHeader className="pb-8">
+                <CardTitle className="text-2xl text-center font-semibold">
                   Rate your confidence in these areas
                 </CardTitle>
-                <p className="text-center text-muted-foreground">
+                <p className="text-center text-muted-foreground text-lg leading-relaxed">
                   Use the scale from 1 (low confidence) to 5 (high confidence) to rate yourself.
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-8 px-8 pb-8">
                 {skillsOptions.map((skill) => (
-                  <div key={skill.id} className="space-y-3">
-                    <div className="flex justify-between items-center">
+                  <div key={skill.id} className="space-y-4">
+                    <div className="flex justify-between items-start">
                       <div>
-                        <Label className="text-sm font-medium">{skill.label}</Label>
-                        <p className="text-xs text-muted-foreground">{skill.description}</p>
+                        <Label className="text-lg font-medium">{skill.label}</Label>
+                        <p className="text-muted-foreground mt-1 leading-relaxed">{skill.description}</p>
                       </div>
-                      <div className="text-sm font-semibold text-primary min-w-8 text-center">
+                      <div className="text-xl font-bold text-primary min-w-12 text-center bg-primary/10 rounded-xl px-3 py-1">
                         {answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence]}
                       </div>
                     </div>
@@ -346,7 +346,7 @@ const QuestionnairePage = () => {
                       step={1}
                       className="w-full"
                     />
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="flex justify-between text-sm text-muted-foreground font-medium">
                       <span>1 - Low</span>
                       <span>3 - Average</span>
                       <span>5 - High</span>
@@ -359,22 +359,22 @@ const QuestionnairePage = () => {
 
           {currentStep === 4 && (
             <>
-              <CardHeader>
-                <CardTitle className="text-xl text-center">
+              <CardHeader className="pb-8">
+                <CardTitle className="text-2xl text-center font-semibold">
                   What's most important to you in a career?
                 </CardTitle>
-                <p className="text-center text-muted-foreground">
+                <p className="text-center text-muted-foreground text-lg leading-relaxed">
                   Select up to 2 values that matter most to you in your future career.
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 px-8 pb-8">
                 {careerValuesOptions.map((option) => (
                   <div
                     key={option.id}
-                    className={`flex items-start space-x-3 p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:border-primary/30 hover:bg-primary/5 ${
+                    className={`flex items-start space-x-4 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:bg-primary/5 hover:shadow-soft ${
                       answers.careerValues.includes(option.id)
-                        ? "border-primary bg-primary/10"
+                        ? "border-primary bg-primary/10 shadow-soft"
                         : "border-border"
                     } ${
                       !answers.careerValues.includes(option.id) && answers.careerValues.length >= 2
@@ -401,11 +401,11 @@ const QuestionnairePage = () => {
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-lg"
                       >
                         {option.label}
                       </label>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-muted-foreground mt-2 leading-relaxed">
                         {option.description}
                       </p>
                     </div>
@@ -417,22 +417,22 @@ const QuestionnairePage = () => {
 
           {currentStep === 5 && (
             <>
-              <CardHeader>
-                <CardTitle className="text-xl text-center">
+              <CardHeader className="pb-8">
+                <CardTitle className="text-2xl text-center font-semibold">
                   Which academic subjects are you strongest in?
                 </CardTitle>
-                <p className="text-center text-muted-foreground">
+                <p className="text-center text-muted-foreground text-lg leading-relaxed">
                   Select all subjects where you excel or have demonstrated strong performance.
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 px-8 pb-8">
                 {academicStrengthsOptions.map((option) => (
                   <div
                     key={option.id}
-                    className={`flex items-start space-x-3 p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:border-primary/30 hover:bg-primary/5 ${
+                    className={`flex items-start space-x-4 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:bg-primary/5 hover:shadow-soft ${
                       answers.academicStrengths.includes(option.id)
-                        ? "border-primary bg-primary/10"
+                        ? "border-primary bg-primary/10 shadow-soft"
                         : "border-border"
                     }`}
                     onClick={() => handleAcademicStrengthToggle(option.id)}
@@ -446,11 +446,11 @@ const QuestionnairePage = () => {
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-lg"
                       >
                         {option.label}
                       </label>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-muted-foreground mt-2 leading-relaxed">
                         {option.description}
                       </p>
                     </div>
@@ -481,14 +481,14 @@ const QuestionnairePage = () => {
             )}
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             {currentStep > 1 && (
               <Button
                 variant="outline"
                 onClick={handleBack}
-                className="border-primary/20 text-primary hover:bg-primary/10"
+                className="border-primary/30 text-primary hover:bg-primary/10 rounded-2xl px-8 py-6 text-lg font-medium"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
+                <ArrowLeft className="w-5 h-5 mr-2" />
                 Back
               </Button>
             )}
@@ -496,10 +496,10 @@ const QuestionnairePage = () => {
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="gradient-primary text-white rounded-2xl px-8 py-6 text-lg font-semibold shadow-medium hover:shadow-large hover:scale-105 transition-all duration-300 border-0"
             >
               {currentStep === 5 ? "Finish Quiz" : "Next"}
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </div>
         </div>
