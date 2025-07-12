@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calculator, FlaskConical, Palette, PenTool, Briefcase, Monitor, User, Users, Building, Blend, Brain, Lightbulb, Crown, Wrench, MessageCircle, DollarSign, Shield, Sparkles, Heart, Scale, Trophy } from "lucide-react";
 
 const QuestionnairePage = () => {
   const navigate = useNavigate();
@@ -35,51 +35,51 @@ const QuestionnairePage = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   
   const subjectOptions = [
-    { id: "math", label: "Math", description: "Numbers, equations, problem-solving" },
-    { id: "science", label: "Science", description: "Biology, chemistry, physics, research" },
-    { id: "arts", label: "Arts", description: "Visual arts, design, creativity" },
-    { id: "writing", label: "Writing", description: "Literature, journalism, communication" },
-    { id: "business", label: "Business", description: "Economics, management, entrepreneurship" },
-    { id: "technology", label: "Technology", description: "Programming, engineering, innovation" }
+    { id: "math", label: "Math", description: "Numbers, equations, problem-solving", icon: Calculator },
+    { id: "science", label: "Science", description: "Biology, chemistry, physics, research", icon: FlaskConical },
+    { id: "arts", label: "Arts", description: "Visual arts, design, creativity", icon: Palette },
+    { id: "writing", label: "Writing", description: "Literature, journalism, communication", icon: PenTool },
+    { id: "business", label: "Business", description: "Economics, management, entrepreneurship", icon: Briefcase },
+    { id: "technology", label: "Technology", description: "Programming, engineering, innovation", icon: Monitor }
   ];
   
   // Question 2: Work preference
   const workStyleOptions = [
-    { id: "independently", label: "Independently", description: "I work best on my own, with minimal supervision" },
-    { id: "small-teams", label: "In small teams", description: "I prefer collaborating with 2-4 people" },
-    { id: "large-groups", label: "Large group projects", description: "I thrive in bigger collaborative environments" },
-    { id: "mix", label: "Mix of both", description: "I enjoy variety in how I work" }
+    { id: "independently", label: "Independently", description: "I work best on my own, with minimal supervision", icon: User },
+    { id: "small-teams", label: "In small teams", description: "I prefer collaborating with 2-4 people", icon: Users },
+    { id: "large-groups", label: "Large group projects", description: "I thrive in bigger collaborative environments", icon: Building },
+    { id: "mix", label: "Mix of both", description: "I enjoy variety in how I work", icon: Blend }
   ];
 
   // Question 3: Skills confidence
   const skillsOptions = [
-    { id: "problemSolving", label: "Problem Solving", description: "Analyzing issues and finding solutions" },
-    { id: "creativeThinking", label: "Creative Thinking", description: "Generating innovative ideas and approaches" },
-    { id: "leadership", label: "Leadership", description: "Guiding and motivating others" },
-    { id: "technicalSkills", label: "Technical Skills", description: "Working with tools, software, or systems" },
-    { id: "communication", label: "Communication", description: "Expressing ideas clearly and effectively" }
+    { id: "problemSolving", label: "Problem Solving", description: "Analyzing issues and finding solutions", icon: Brain },
+    { id: "creativeThinking", label: "Creative Thinking", description: "Generating innovative ideas and approaches", icon: Lightbulb },
+    { id: "leadership", label: "Leadership", description: "Guiding and motivating others", icon: Crown },
+    { id: "technicalSkills", label: "Technical Skills", description: "Working with tools, software, or systems", icon: Wrench },
+    { id: "communication", label: "Communication", description: "Expressing ideas clearly and effectively", icon: MessageCircle }
   ];
 
   // Question 4: Career values
   const careerValuesOptions = [
-    { id: "high-salary", label: "High salary", description: "Earning a competitive income and financial security" },
-    { id: "job-security", label: "Job security", description: "Stable employment and predictable career path" },
-    { id: "creative-freedom", label: "Creative freedom", description: "Autonomy to innovate and express creativity" },
-    { id: "helping-others", label: "Helping others", description: "Making a positive impact on people's lives" },
-    { id: "work-life-balance", label: "Work-life balance", description: "Manageable hours and personal time" },
-    { id: "leadership-opportunities", label: "Leadership opportunities", description: "Managing teams and driving organizational change" }
+    { id: "high-salary", label: "High salary", description: "Earning a competitive income and financial security", icon: DollarSign },
+    { id: "job-security", label: "Job security", description: "Stable employment and predictable career path", icon: Shield },
+    { id: "creative-freedom", label: "Creative freedom", description: "Autonomy to innovate and express creativity", icon: Sparkles },
+    { id: "helping-others", label: "Helping others", description: "Making a positive impact on people's lives", icon: Heart },
+    { id: "work-life-balance", label: "Work-life balance", description: "Manageable hours and personal time", icon: Scale },
+    { id: "leadership-opportunities", label: "Leadership opportunities", description: "Managing teams and driving organizational change", icon: Trophy }
   ];
 
   // Question 5: Academic strengths
   const academicStrengthsOptions = [
-    { id: "mathematics", label: "Mathematics", description: "Algebra, calculus, statistics, problem-solving" },
-    { id: "sciences", label: "Sciences", description: "Biology, chemistry, physics, research methods" },
-    { id: "english-literature", label: "English/Literature", description: "Writing, reading comprehension, analysis" },
-    { id: "history", label: "History", description: "Research, critical thinking, understanding context" },
-    { id: "foreign-languages", label: "Foreign Languages", description: "Communication, cultural understanding" },
-    { id: "computer-science", label: "Computer Science", description: "Programming, logic, technology" },
-    { id: "art", label: "Art", description: "Creativity, visual design, artistic expression" },
-    { id: "business", label: "Business", description: "Economics, management, entrepreneurship" }
+    { id: "mathematics", label: "Mathematics", description: "Algebra, calculus, statistics, problem-solving", icon: Calculator },
+    { id: "sciences", label: "Sciences", description: "Biology, chemistry, physics, research methods", icon: FlaskConical },
+    { id: "english-literature", label: "English/Literature", description: "Writing, reading comprehension, analysis", icon: PenTool },
+    { id: "history", label: "History", description: "Research, critical thinking, understanding context", icon: Crown },
+    { id: "foreign-languages", label: "Foreign Languages", description: "Communication, cultural understanding", icon: MessageCircle },
+    { id: "computer-science", label: "Computer Science", description: "Programming, logic, technology", icon: Monitor },
+    { id: "art", label: "Art", description: "Creativity, visual design, artistic expression", icon: Palette },
+    { id: "business", label: "Business", description: "Economics, management, entrepreneurship", icon: Briefcase }
   ];
 
   const handleSubjectToggle = (subjectId: string) => {
@@ -191,7 +191,17 @@ const QuestionnairePage = () => {
   const progressPercentage = (currentStep / totalSteps) * 100;
 
   return (
-    <div className="min-h-screen gradient-warm py-8 px-6">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 gradient-warm"></div>
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-40 right-20 w-48 h-48 bg-orange-accent/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-40 left-1/4 w-40 h-40 bg-purple-accent/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-1/3 w-36 h-36 bg-success/10 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="relative z-10 py-8 px-6">
       <div className="container mx-auto max-w-3xl">
         {/* Header with back button */}
         <div className="flex items-center justify-between mb-8">
@@ -317,26 +327,34 @@ const QuestionnairePage = () => {
         <Card className="border-primary/10 shadow-large mb-8 rounded-3xl bg-white/90 backdrop-blur-sm">
           {currentStep === 1 && (
             <>
-              <CardHeader className="pb-8">
-                <CardTitle className="text-2xl text-center font-semibold">
+              <CardHeader className="pb-12">
+                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
                   What subjects excite you most?
                 </CardTitle>
-                <p className="text-center text-muted-foreground text-lg leading-relaxed">
+                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
                   Select all that apply. Choose the subjects that genuinely interest and energize you.
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-4 px-8 pb-8">
+              <CardContent className="space-y-6 px-8 pb-8">
                 {subjectOptions.map((option) => (
                   <div
                     key={option.id}
-                    className={`flex items-start space-x-4 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:bg-primary/5 hover:shadow-soft ${
+                    className={`group flex items-start space-x-5 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large ${
                       selectedSubjects.includes(option.id)
-                        ? "border-primary bg-primary/10 shadow-soft"
-                        : "border-border"
+                        ? "border-primary bg-primary/10 shadow-medium scale-[1.01]"
+                        : "border-border hover:border-primary/30"
                     }`}
                     onClick={() => handleSubjectToggle(option.id)}
                   >
+                    {/* Icon */}
+                    <div className={`p-3 rounded-xl transition-all duration-300 ${
+                      selectedSubjects.includes(option.id)
+                        ? "bg-primary text-primary-foreground shadow-soft"
+                        : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
+                    }`}>
+                      <option.icon className="w-6 h-6" />
+                    </div>
                     <Checkbox
                       id={option.id}
                       checked={selectedSubjects.includes(option.id)}
@@ -346,11 +364,11 @@ const QuestionnairePage = () => {
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-lg"
+                        className="font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-xl mb-2 block"
                       >
                         {option.label}
                       </label>
-                      <p className="text-muted-foreground mt-2 leading-relaxed">
+                      <p className="text-muted-foreground leading-relaxed text-lg">
                         {option.description}
                       </p>
                     </div>
@@ -362,16 +380,16 @@ const QuestionnairePage = () => {
 
           {currentStep === 2 && (
             <>
-              <CardHeader className="pb-8">
-                <CardTitle className="text-2xl text-center font-semibold">
+              <CardHeader className="pb-12">
+                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
                   How do you prefer to work?
                 </CardTitle>
-                <p className="text-center text-muted-foreground text-lg leading-relaxed">
+                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
                   Select the working style that best describes your preference.
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-4 px-8 pb-8">
+              <CardContent className="space-y-6 px-8 pb-8">
                 <RadioGroup 
                   value={answers.workStyle} 
                   onValueChange={handleWorkStyleChange}
@@ -380,13 +398,21 @@ const QuestionnairePage = () => {
                   {workStyleOptions.map((option) => (
                     <div
                       key={option.id}
-                      className={`flex items-start space-x-4 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:bg-primary/5 hover:shadow-soft ${
+                      className={`group flex items-start space-x-5 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large ${
                         answers.workStyle === option.id
-                          ? "border-primary bg-primary/10 shadow-soft"
-                          : "border-border"
+                          ? "border-primary bg-primary/10 shadow-medium scale-[1.01]"
+                          : "border-border hover:border-primary/30"
                       }`}
                       onClick={() => handleWorkStyleChange(option.id)}
                     >
+                      {/* Icon */}
+                      <div className={`p-3 rounded-xl transition-all duration-300 ${
+                        answers.workStyle === option.id
+                          ? "bg-primary text-primary-foreground shadow-soft"
+                          : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
+                      }`}>
+                        <option.icon className="w-6 h-6" />
+                      </div>
                       <RadioGroupItem
                         value={option.id}
                         id={option.id}
@@ -412,24 +438,29 @@ const QuestionnairePage = () => {
 
           {currentStep === 3 && (
             <>
-              <CardHeader className="pb-8">
-                <CardTitle className="text-2xl text-center font-semibold">
+              <CardHeader className="pb-12">
+                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
                   Rate your confidence in these areas
                 </CardTitle>
-                <p className="text-center text-muted-foreground text-lg leading-relaxed">
+                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
                   Use the scale from 1 (low confidence) to 5 (high confidence) to rate yourself.
                 </p>
               </CardHeader>
               
               <CardContent className="space-y-8 px-8 pb-8">
                 {skillsOptions.map((skill) => (
-                  <div key={skill.id} className="space-y-4">
+                  <div key={skill.id} className="space-y-4 p-6 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-all duration-300">
                     <div className="flex justify-between items-start">
-                      <div>
-                        <Label className="text-lg font-medium">{skill.label}</Label>
-                        <p className="text-muted-foreground mt-1 leading-relaxed">{skill.description}</p>
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 rounded-xl bg-primary/10 text-primary">
+                          <skill.icon className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <Label className="text-xl font-bold">{skill.label}</Label>
+                          <p className="text-muted-foreground mt-1 leading-relaxed text-lg">{skill.description}</p>
+                        </div>
                       </div>
-                      <div className="text-xl font-bold text-primary min-w-12 text-center bg-primary/10 rounded-xl px-3 py-1">
+                      <div className="text-2xl font-bold text-primary min-w-16 text-center bg-primary/10 rounded-2xl px-4 py-2 shadow-soft">
                         {answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence]}
                       </div>
                     </div>
@@ -454,26 +485,26 @@ const QuestionnairePage = () => {
 
           {currentStep === 4 && (
             <>
-              <CardHeader className="pb-8">
-                <CardTitle className="text-2xl text-center font-semibold">
+              <CardHeader className="pb-12">
+                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
                   What's most important to you in a career?
                 </CardTitle>
-                <p className="text-center text-muted-foreground text-lg leading-relaxed">
+                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
                   Select up to 2 values that matter most to you in your future career.
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-4 px-8 pb-8">
+              <CardContent className="space-y-6 px-8 pb-8">
                 {careerValuesOptions.map((option) => (
                   <div
                     key={option.id}
-                    className={`flex items-start space-x-4 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:bg-primary/5 hover:shadow-soft ${
+                    className={`group flex items-start space-x-5 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large ${
                       answers.careerValues.includes(option.id)
-                        ? "border-primary bg-primary/10 shadow-soft"
-                        : "border-border"
+                        ? "border-primary bg-primary/10 shadow-medium scale-[1.01]"
+                        : "border-border hover:border-primary/30"
                     } ${
                       !answers.careerValues.includes(option.id) && answers.careerValues.length >= 2
-                        ? "opacity-50 cursor-not-allowed"
+                        ? "opacity-50 cursor-not-allowed hover:scale-100"
                         : ""
                     }`}
                     onClick={() => {
@@ -482,6 +513,14 @@ const QuestionnairePage = () => {
                       }
                     }}
                   >
+                    {/* Icon */}
+                    <div className={`p-3 rounded-xl transition-all duration-300 ${
+                      answers.careerValues.includes(option.id)
+                        ? "bg-primary text-primary-foreground shadow-soft"
+                        : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
+                    }`}>
+                      <option.icon className="w-6 h-6" />
+                    </div>
                     <Checkbox
                       id={option.id}
                       checked={answers.careerValues.includes(option.id)}
@@ -496,11 +535,11 @@ const QuestionnairePage = () => {
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-lg"
+                        className="font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-xl mb-2 block"
                       >
                         {option.label}
                       </label>
-                      <p className="text-muted-foreground mt-2 leading-relaxed">
+                      <p className="text-muted-foreground leading-relaxed text-lg">
                         {option.description}
                       </p>
                     </div>
@@ -512,26 +551,34 @@ const QuestionnairePage = () => {
 
           {currentStep === 5 && (
             <>
-              <CardHeader className="pb-8">
-                <CardTitle className="text-2xl text-center font-semibold">
+              <CardHeader className="pb-12">
+                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
                   Which academic subjects are you strongest in?
                 </CardTitle>
-                <p className="text-center text-muted-foreground text-lg leading-relaxed">
+                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
                   Select all subjects where you excel or have demonstrated strong performance.
                 </p>
               </CardHeader>
               
-              <CardContent className="space-y-4 px-8 pb-8">
+              <CardContent className="space-y-6 px-8 pb-8">
                 {academicStrengthsOptions.map((option) => (
                   <div
                     key={option.id}
-                    className={`flex items-start space-x-4 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:border-primary/50 hover:bg-primary/5 hover:shadow-soft ${
+                    className={`group flex items-start space-x-5 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large ${
                       answers.academicStrengths.includes(option.id)
-                        ? "border-primary bg-primary/10 shadow-soft"
-                        : "border-border"
+                        ? "border-primary bg-primary/10 shadow-medium scale-[1.01]"
+                        : "border-border hover:border-primary/30"
                     }`}
                     onClick={() => handleAcademicStrengthToggle(option.id)}
                   >
+                    {/* Icon */}
+                    <div className={`p-3 rounded-xl transition-all duration-300 ${
+                      answers.academicStrengths.includes(option.id)
+                        ? "bg-primary text-primary-foreground shadow-soft"
+                        : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
+                    }`}>
+                      <option.icon className="w-6 h-6" />
+                    </div>
                     <Checkbox
                       id={option.id}
                       checked={answers.academicStrengths.includes(option.id)}
@@ -576,14 +623,14 @@ const QuestionnairePage = () => {
             )}
           </div>
           
-          <div className="flex gap-4">
+          <div className="flex gap-6 justify-center">
             {currentStep > 1 && (
               <Button
                 variant="outline"
                 onClick={handleBack}
-                className="border-primary/30 text-primary hover:bg-primary/10 rounded-2xl px-8 py-6 text-lg font-medium"
+                className="border-2 border-primary/30 text-primary hover:bg-primary/10 rounded-2xl px-10 py-6 text-xl font-bold hover:scale-105 transition-all duration-300 hover:shadow-medium"
               >
-                <ArrowLeft className="w-5 h-5 mr-2" />
+                <ArrowLeft className="w-6 h-6 mr-3" />
                 Back
               </Button>
             )}
@@ -591,13 +638,23 @@ const QuestionnairePage = () => {
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="gradient-primary text-white rounded-2xl px-8 py-6 text-lg font-semibold shadow-medium hover:shadow-large hover:scale-105 transition-all duration-300 border-0"
+              className="gradient-primary text-white rounded-2xl px-12 py-6 text-xl font-bold shadow-large hover:shadow-xl hover:scale-105 transition-all duration-300 border-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              {currentStep === 5 ? "Finish Quiz" : "Next"}
-              <ArrowRight className="w-5 h-5 ml-2" />
+              {currentStep === 5 ? (
+                <>
+                  <Trophy className="w-6 h-6 mr-3" />
+                  Finish Quiz
+                </>
+              ) : (
+                <>
+                  Next Step
+                  <ArrowRight className="w-6 h-6 ml-3" />
+                </>
+              )}
             </Button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
