@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -18,7 +19,14 @@ const QuestionnairePage = () => {
   // All answers storage
   const [answers, setAnswers] = useState({
     subjects: [] as string[],
-    workStyle: "" as string
+    workStyle: "" as string,
+    skillsConfidence: {
+      problemSolving: 3,
+      creativeThinking: 3,
+      leadership: 3,
+      technicalSkills: 3,
+      communication: 3
+    }
   });
   
   // Question 1: Subject interests
@@ -41,6 +49,15 @@ const QuestionnairePage = () => {
     { id: "mix", label: "Mix of both", description: "I enjoy variety in how I work" }
   ];
 
+  // Question 3: Skills confidence
+  const skillsOptions = [
+    { id: "problemSolving", label: "Problem Solving", description: "Analyzing issues and finding solutions" },
+    { id: "creativeThinking", label: "Creative Thinking", description: "Generating innovative ideas and approaches" },
+    { id: "leadership", label: "Leadership", description: "Guiding and motivating others" },
+    { id: "technicalSkills", label: "Technical Skills", description: "Working with tools, software, or systems" },
+    { id: "communication", label: "Communication", description: "Expressing ideas clearly and effectively" }
+  ];
+
   const handleSubjectToggle = (subjectId: string) => {
     setSelectedSubjects(prev => 
       prev.includes(subjectId)
@@ -53,6 +70,16 @@ const QuestionnairePage = () => {
     setAnswers(prev => ({ ...prev, workStyle: value }));
   };
 
+  const handleSkillConfidenceChange = (skillId: string, value: number[]) => {
+    setAnswers(prev => ({
+      ...prev,
+      skillsConfidence: {
+        ...prev.skillsConfidence,
+        [skillId]: value[0]
+      }
+    }));
+  };
+
   const handleNext = () => {
     if (currentStep === 1) {
       if (selectedSubjects.length === 0) return;
@@ -63,14 +90,18 @@ const QuestionnairePage = () => {
     } else if (currentStep === 2) {
       if (!answers.workStyle) return;
       
-      console.log("All answers so far:", { ...answers, workStyle: answers.workStyle });
+      setCurrentStep(3);
+    } else if (currentStep === 3) {
+      console.log("All answers so far:", answers);
       // TODO: Navigate to next question
-      alert("Moving to question 3...");
+      alert("Moving to question 4...");
     }
   };
 
   const handleBack = () => {
-    if (currentStep === 2) {
+    if (currentStep === 3) {
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
       setCurrentStep(1);
     } else if (currentStep === 1) {
       navigate("/auth");
@@ -80,6 +111,7 @@ const QuestionnairePage = () => {
   const canProceed = () => {
     if (currentStep === 1) return selectedSubjects.length > 0;
     if (currentStep === 2) return answers.workStyle !== "";
+    if (currentStep === 3) return true; // Skills have default values, always can proceed
     return false;
   };
 
@@ -209,6 +241,48 @@ const QuestionnairePage = () => {
               </CardContent>
             </>
           )}
+
+          {currentStep === 3 && (
+            <>
+              <CardHeader>
+                <CardTitle className="text-xl text-center">
+                  Rate your confidence in these areas
+                </CardTitle>
+                <p className="text-center text-muted-foreground">
+                  Use the scale from 1 (low confidence) to 5 (high confidence) to rate yourself.
+                </p>
+              </CardHeader>
+              
+              <CardContent className="space-y-6">
+                {skillsOptions.map((skill) => (
+                  <div key={skill.id} className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <Label className="text-sm font-medium">{skill.label}</Label>
+                        <p className="text-xs text-muted-foreground">{skill.description}</p>
+                      </div>
+                      <div className="text-sm font-semibold text-primary min-w-8 text-center">
+                        {answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence]}
+                      </div>
+                    </div>
+                    <Slider
+                      value={[answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence]]}
+                      onValueChange={(value) => handleSkillConfidenceChange(skill.id, value)}
+                      max={5}
+                      min={1}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>1 - Low</span>
+                      <span>3 - Average</span>
+                      <span>5 - High</span>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </>
+          )}
         </Card>
 
         {/* Navigation */}
@@ -219,6 +293,9 @@ const QuestionnairePage = () => {
             )}
             {currentStep === 2 && answers.workStyle && (
               <span>Work style selected</span>
+            )}
+            {currentStep === 3 && (
+              <span>Confidence levels set</span>
             )}
           </div>
           
