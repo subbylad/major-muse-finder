@@ -37,43 +37,43 @@ const Index = () => {
             Take our comprehensive questionnaire and get matched with majors that align with your unique profile
           </p>
           
-          {/* CTA Button - Mobile Optimized */}
+          {/* CTA Button - Enhanced with micro-interactions */}
           <Button 
             onClick={handleGetStarted}
-            className="w-full sm:w-auto min-h-[56px] sm:min-h-[64px] gradient-primary text-white px-8 sm:px-12 py-4 sm:py-8 text-lg sm:text-xl font-semibold rounded-2xl transition-all duration-300 hover:scale-105 shadow-large hover:shadow-xl border-0 touch-manipulation"
+            className="w-full sm:w-auto min-h-[56px] sm:min-h-[64px] gradient-primary text-white px-8 sm:px-12 py-4 sm:py-8 text-lg sm:text-xl font-semibold rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-large hover:shadow-xl border-0 touch-manipulation ripple"
           >
             <Target className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
             Get Started
           </Button>
         </div>
         
-        {/* Feature Cards - Mobile Optimized */}
+        {/* Feature Cards - Enhanced with micro-interactions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 mt-16 sm:mt-24 max-w-5xl mx-auto">
-          <Card className="p-6 sm:p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border-primary/10 rounded-2xl bg-white/80 backdrop-blur-sm">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <GraduationCap className="w-7 h-7 sm:w-8 sm:h-8 text-primary" />
+          <Card className="p-6 sm:p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-2 hover:scale-105 active:scale-98 border-primary/10 rounded-2xl bg-white/80 backdrop-blur-sm cursor-pointer group">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110">
+              <GraduationCap className="w-7 h-7 sm:w-8 sm:h-8 text-primary group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Personalized Matching</h3>
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 group-hover:text-primary transition-colors duration-300">Personalized Matching</h3>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               Our algorithm analyzes your responses to suggest majors that fit your personality and goals
             </p>
           </Card>
           
-          <Card className="p-6 sm:p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border-orange-accent/10 rounded-2xl bg-white/80 backdrop-blur-sm">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-orange-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <Compass className="w-7 h-7 sm:w-8 sm:h-8 text-orange-accent" />
+          <Card className="p-6 sm:p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-2 hover:scale-105 active:scale-98 border-orange-accent/10 rounded-2xl bg-white/80 backdrop-blur-sm cursor-pointer group">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-orange-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:bg-orange-accent/20 transition-all duration-300 group-hover:scale-110">
+              <Compass className="w-7 h-7 sm:w-8 sm:h-8 text-orange-accent group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Career Insights</h3>
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 group-hover:text-orange-accent transition-colors duration-300">Career Insights</h3>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               Learn about potential career paths and opportunities for each recommended major
             </p>
           </Card>
           
-          <Card className="p-6 sm:p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-1 border-success/10 rounded-2xl bg-white/80 backdrop-blur-sm sm:col-span-2 md:col-span-1">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-success/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <Users className="w-7 h-7 sm:w-8 sm:h-8 text-success" />
+          <Card className="p-6 sm:p-8 text-center hover:shadow-medium transition-all duration-300 hover:-translate-y-2 hover:scale-105 active:scale-98 border-success/10 rounded-2xl bg-white/80 backdrop-blur-sm sm:col-span-2 md:col-span-1 cursor-pointer group">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-success/10 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:bg-success/20 transition-all duration-300 group-hover:scale-110">
+              <Users className="w-7 h-7 sm:w-8 sm:h-8 text-success group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Trusted by Students</h3>
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 group-hover:text-success transition-colors duration-300">Trusted by Students</h3>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               Join thousands of students who found their perfect academic path through Align
             </p>

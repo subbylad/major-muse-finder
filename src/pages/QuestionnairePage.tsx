@@ -83,11 +83,20 @@ const QuestionnairePage = () => {
   ];
 
   const handleSubjectToggle = (subjectId: string) => {
-    setSelectedSubjects(prev => 
-      prev.includes(subjectId)
+    setSelectedSubjects(prev => {
+      const newSelection = prev.includes(subjectId)
         ? prev.filter(id => id !== subjectId)
-        : [...prev, subjectId]
-    );
+        : [...prev, subjectId];
+      
+      // Trigger selection animation
+      const element = document.querySelector(`[data-subject="${subjectId}"]`);
+      if (element && !prev.includes(subjectId)) {
+        element.classList.add('selection-bounce');
+        setTimeout(() => element.classList.remove('selection-bounce'), 200);
+      }
+      
+      return newSelection;
+    });
   };
 
   const handleWorkStyleChange = (value: string) => {
@@ -140,28 +149,28 @@ const QuestionnairePage = () => {
     if (currentStep === 1) {
       if (selectedSubjects.length === 0) return;
       
-      // Save subjects and move to next question
+      // Save subjects and move to next question with animation
       setAnswers(prev => ({ ...prev, subjects: selectedSubjects }));
-      setCurrentStep(2);
+      setTimeout(() => setCurrentStep(2), 100);
     } else if (currentStep === 2) {
       if (!answers.workStyle) return;
       
-      setCurrentStep(3);
+      setTimeout(() => setCurrentStep(3), 100);
     } else if (currentStep === 3) {
-      setCurrentStep(4);
+      setTimeout(() => setCurrentStep(4), 100);
     } else if (currentStep === 4) {
       if (answers.careerValues.length === 0) return;
       
-      setCurrentStep(5);
+      setTimeout(() => setCurrentStep(5), 100);
     } else if (currentStep === 5) {
       if (answers.academicStrengths.length === 0) return;
       
-      // Save final academic strengths
+      // Save final academic strengths with success animation
       setAnswers(prev => ({ ...prev, academicStrengths: prev.academicStrengths }));
       console.log("Final answers:", answers);
       
-      // Navigate to results page
-      navigate("/results");
+      // Add completion animation before navigation
+      setTimeout(() => navigate("/results"), 800);
     }
   };
 
@@ -236,8 +245,11 @@ const QuestionnairePage = () => {
             
             {/* Animated Progress Line */}
             <div 
-              className="absolute top-6 sm:top-8 left-0 h-0.5 sm:h-1 bg-gradient-to-r from-primary to-purple-accent rounded-full mx-6 sm:mx-8 transition-all duration-700 ease-out"
-              style={{ width: `calc(${progressPercentage}% - 48px)` }}
+              className="absolute top-6 sm:top-8 left-0 h-0.5 sm:h-1 bg-gradient-to-r from-primary to-purple-accent rounded-full mx-6 sm:mx-8 transition-all duration-700 ease-out animate-progress-fill"
+              style={{ 
+                width: `calc(${progressPercentage}% - 48px)`,
+                '--progress-width': `${progressPercentage}%`
+              } as React.CSSProperties}
             ></div>
             
             {/* Step Circles - Mobile Optimized */}
@@ -340,9 +352,10 @@ const QuestionnairePage = () => {
                 {subjectOptions.map((option) => (
                   <div
                     key={option.id}
+                    data-subject={option.id}
                     className={`group flex items-start space-x-3 sm:space-x-5 p-4 sm:p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.01] sm:hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large min-h-[80px] touch-manipulation ${
                       selectedSubjects.includes(option.id)
-                        ? "border-primary bg-primary/10 shadow-medium scale-[1.01]"
+                        ? "border-primary bg-primary/10 shadow-medium scale-[1.01] animate-scale-in"
                         : "border-border hover:border-primary/30"
                     }`}
                     onClick={() => handleSubjectToggle(option.id)}
