@@ -17,8 +17,17 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    /* Academic blue primary */
+    --primary: 220 91% 52%;
     --primary-foreground: 210 40% 98%;
+    
+    /* Academic success color */
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+    
+    /* Encouraging orange accent */
+    --orange-accent: 25 95% 53%;
+    --orange-accent-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -65,8 +74,14 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 217 91% 60%;
     --primary-foreground: 222.2 47.4% 11.2%;
+    
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+    
+    --orange-accent: 25 95% 53%;
+    --orange-accent-foreground: 210 40% 98%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
