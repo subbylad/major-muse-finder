@@ -26,7 +26,8 @@ const QuestionnairePage = () => {
       leadership: 3,
       technicalSkills: 3,
       communication: 3
-    }
+    },
+    careerValues: [] as string[]
   });
   
   // Question 1: Subject interests
@@ -58,6 +59,16 @@ const QuestionnairePage = () => {
     { id: "communication", label: "Communication", description: "Expressing ideas clearly and effectively" }
   ];
 
+  // Question 4: Career values
+  const careerValuesOptions = [
+    { id: "high-salary", label: "High salary", description: "Earning a competitive income and financial security" },
+    { id: "job-security", label: "Job security", description: "Stable employment and predictable career path" },
+    { id: "creative-freedom", label: "Creative freedom", description: "Autonomy to innovate and express creativity" },
+    { id: "helping-others", label: "Helping others", description: "Making a positive impact on people's lives" },
+    { id: "work-life-balance", label: "Work-life balance", description: "Manageable hours and personal time" },
+    { id: "leadership-opportunities", label: "Leadership opportunities", description: "Managing teams and driving organizational change" }
+  ];
+
   const handleSubjectToggle = (subjectId: string) => {
     setSelectedSubjects(prev => 
       prev.includes(subjectId)
@@ -80,6 +91,29 @@ const QuestionnairePage = () => {
     }));
   };
 
+  const handleCareerValueToggle = (valueId: string) => {
+    setAnswers(prev => {
+      const currentValues = prev.careerValues;
+      
+      if (currentValues.includes(valueId)) {
+        // Remove if already selected
+        return {
+          ...prev,
+          careerValues: currentValues.filter(id => id !== valueId)
+        };
+      } else if (currentValues.length < 2) {
+        // Add if less than 2 selected
+        return {
+          ...prev,
+          careerValues: [...currentValues, valueId]
+        };
+      }
+      
+      // Don't add if already at maximum
+      return prev;
+    });
+  };
+
   const handleNext = () => {
     if (currentStep === 1) {
       if (selectedSubjects.length === 0) return;
@@ -92,14 +126,20 @@ const QuestionnairePage = () => {
       
       setCurrentStep(3);
     } else if (currentStep === 3) {
+      setCurrentStep(4);
+    } else if (currentStep === 4) {
+      if (answers.careerValues.length === 0) return;
+      
       console.log("All answers so far:", answers);
       // TODO: Navigate to next question
-      alert("Moving to question 4...");
+      alert("Moving to question 5...");
     }
   };
 
   const handleBack = () => {
-    if (currentStep === 3) {
+    if (currentStep === 4) {
+      setCurrentStep(3);
+    } else if (currentStep === 3) {
       setCurrentStep(2);
     } else if (currentStep === 2) {
       setCurrentStep(1);
@@ -112,6 +152,7 @@ const QuestionnairePage = () => {
     if (currentStep === 1) return selectedSubjects.length > 0;
     if (currentStep === 2) return answers.workStyle !== "";
     if (currentStep === 3) return true; // Skills have default values, always can proceed
+    if (currentStep === 4) return answers.careerValues.length > 0;
     return false;
   };
 
@@ -283,6 +324,64 @@ const QuestionnairePage = () => {
               </CardContent>
             </>
           )}
+
+          {currentStep === 4 && (
+            <>
+              <CardHeader>
+                <CardTitle className="text-xl text-center">
+                  What's most important to you in a career?
+                </CardTitle>
+                <p className="text-center text-muted-foreground">
+                  Select up to 2 values that matter most to you in your future career.
+                </p>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                {careerValuesOptions.map((option) => (
+                  <div
+                    key={option.id}
+                    className={`flex items-start space-x-3 p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:border-primary/30 hover:bg-primary/5 ${
+                      answers.careerValues.includes(option.id)
+                        ? "border-primary bg-primary/10"
+                        : "border-border"
+                    } ${
+                      !answers.careerValues.includes(option.id) && answers.careerValues.length >= 2
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      if (answers.careerValues.includes(option.id) || answers.careerValues.length < 2) {
+                        handleCareerValueToggle(option.id);
+                      }
+                    }}
+                  >
+                    <Checkbox
+                      id={option.id}
+                      checked={answers.careerValues.includes(option.id)}
+                      onCheckedChange={() => {
+                        if (answers.careerValues.includes(option.id) || answers.careerValues.length < 2) {
+                          handleCareerValueToggle(option.id);
+                        }
+                      }}
+                      className="mt-1"
+                      disabled={!answers.careerValues.includes(option.id) && answers.careerValues.length >= 2}
+                    />
+                    <div className="flex-1">
+                      <label
+                        htmlFor={option.id}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {option.label}
+                      </label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {option.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </>
+          )}
         </Card>
 
         {/* Navigation */}
@@ -296,6 +395,9 @@ const QuestionnairePage = () => {
             )}
             {currentStep === 3 && (
               <span>Confidence levels set</span>
+            )}
+            {currentStep === 4 && (
+              <span>Selected: {answers.careerValues.length}/2</span>
             )}
           </div>
           
