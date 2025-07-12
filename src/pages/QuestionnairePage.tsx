@@ -27,7 +27,8 @@ const QuestionnairePage = () => {
       technicalSkills: 3,
       communication: 3
     },
-    careerValues: [] as string[]
+    careerValues: [] as string[],
+    academicStrengths: [] as string[]
   });
   
   // Question 1: Subject interests
@@ -67,6 +68,18 @@ const QuestionnairePage = () => {
     { id: "helping-others", label: "Helping others", description: "Making a positive impact on people's lives" },
     { id: "work-life-balance", label: "Work-life balance", description: "Manageable hours and personal time" },
     { id: "leadership-opportunities", label: "Leadership opportunities", description: "Managing teams and driving organizational change" }
+  ];
+
+  // Question 5: Academic strengths
+  const academicStrengthsOptions = [
+    { id: "mathematics", label: "Mathematics", description: "Algebra, calculus, statistics, problem-solving" },
+    { id: "sciences", label: "Sciences", description: "Biology, chemistry, physics, research methods" },
+    { id: "english-literature", label: "English/Literature", description: "Writing, reading comprehension, analysis" },
+    { id: "history", label: "History", description: "Research, critical thinking, understanding context" },
+    { id: "foreign-languages", label: "Foreign Languages", description: "Communication, cultural understanding" },
+    { id: "computer-science", label: "Computer Science", description: "Programming, logic, technology" },
+    { id: "art", label: "Art", description: "Creativity, visual design, artistic expression" },
+    { id: "business", label: "Business", description: "Economics, management, entrepreneurship" }
   ];
 
   const handleSubjectToggle = (subjectId: string) => {
@@ -114,6 +127,15 @@ const QuestionnairePage = () => {
     });
   };
 
+  const handleAcademicStrengthToggle = (strengthId: string) => {
+    setAnswers(prev => ({
+      ...prev,
+      academicStrengths: prev.academicStrengths.includes(strengthId)
+        ? prev.academicStrengths.filter(id => id !== strengthId)
+        : [...prev.academicStrengths, strengthId]
+    }));
+  };
+
   const handleNext = () => {
     if (currentStep === 1) {
       if (selectedSubjects.length === 0) return;
@@ -130,14 +152,20 @@ const QuestionnairePage = () => {
     } else if (currentStep === 4) {
       if (answers.careerValues.length === 0) return;
       
-      console.log("All answers so far:", answers);
-      // TODO: Navigate to next question
-      alert("Moving to question 5...");
+      setCurrentStep(5);
+    } else if (currentStep === 5) {
+      if (answers.academicStrengths.length === 0) return;
+      
+      console.log("Final answers:", answers);
+      // TODO: Navigate to results page
+      alert("Quiz completed! Generating your major recommendations...");
     }
   };
 
   const handleBack = () => {
-    if (currentStep === 4) {
+    if (currentStep === 5) {
+      setCurrentStep(4);
+    } else if (currentStep === 4) {
       setCurrentStep(3);
     } else if (currentStep === 3) {
       setCurrentStep(2);
@@ -153,6 +181,7 @@ const QuestionnairePage = () => {
     if (currentStep === 2) return answers.workStyle !== "";
     if (currentStep === 3) return true; // Skills have default values, always can proceed
     if (currentStep === 4) return answers.careerValues.length > 0;
+    if (currentStep === 5) return answers.academicStrengths.length > 0;
     return false;
   };
 
@@ -382,6 +411,51 @@ const QuestionnairePage = () => {
               </CardContent>
             </>
           )}
+
+          {currentStep === 5 && (
+            <>
+              <CardHeader>
+                <CardTitle className="text-xl text-center">
+                  Which academic subjects are you strongest in?
+                </CardTitle>
+                <p className="text-center text-muted-foreground">
+                  Select all subjects where you excel or have demonstrated strong performance.
+                </p>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                {academicStrengthsOptions.map((option) => (
+                  <div
+                    key={option.id}
+                    className={`flex items-start space-x-3 p-4 rounded-lg border transition-all duration-200 cursor-pointer hover:border-primary/30 hover:bg-primary/5 ${
+                      answers.academicStrengths.includes(option.id)
+                        ? "border-primary bg-primary/10"
+                        : "border-border"
+                    }`}
+                    onClick={() => handleAcademicStrengthToggle(option.id)}
+                  >
+                    <Checkbox
+                      id={option.id}
+                      checked={answers.academicStrengths.includes(option.id)}
+                      onCheckedChange={() => handleAcademicStrengthToggle(option.id)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <label
+                        htmlFor={option.id}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {option.label}
+                      </label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {option.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </>
+          )}
         </Card>
 
         {/* Navigation */}
@@ -398,6 +472,9 @@ const QuestionnairePage = () => {
             )}
             {currentStep === 4 && (
               <span>Selected: {answers.careerValues.length}/2</span>
+            )}
+            {currentStep === 5 && answers.academicStrengths.length > 0 && (
+              <span>{answers.academicStrengths.length} strength{answers.academicStrengths.length !== 1 ? "s" : ""} selected</span>
             )}
           </div>
           
@@ -418,7 +495,7 @@ const QuestionnairePage = () => {
               disabled={!canProceed()}
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              Next
+              {currentStep === 5 ? "Finish Quiz" : "Next"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
