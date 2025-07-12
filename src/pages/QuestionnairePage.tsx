@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -7,25 +9,27 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Calculator, FlaskConical, Palette, PenTool, Briefcase, Monitor, User, Users, Building, Blend, Brain, Lightbulb, Crown, Wrench, MessageCircle, DollarSign, Shield, Sparkles, Heart, Scale, Trophy } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calculator, FlaskConical, Palette, PenTool, Briefcase, Monitor, User, Users, Building, Blend, Brain, Lightbulb, Crown, Wrench, MessageCircle, DollarSign, Shield, Sparkles, Heart, Scale, Trophy, Loader2 } from "lucide-react";
 
 const QuestionnairePage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // Current step state
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
+  const [isLoading, setIsLoading] = useState(false);
   
   // All answers storage
   const [answers, setAnswers] = useState({
-    subjects: [] as string[],
+    interests: [] as string[],
     workStyle: "" as string,
     skillsConfidence: {
-      problemSolving: 3,
-      creativeThinking: 3,
-      leadership: 3,
-      technicalSkills: 3,
-      communication: 3
+      problemSolving: [3],
+      creativeThinking: [3],
+      leadership: [3],
+      technicalSkills: [3],
+      communication: [3]
     },
     careerValues: [] as string[],
     academicStrengths: [] as string[]
@@ -108,7 +112,7 @@ const QuestionnairePage = () => {
       ...prev,
       skillsConfidence: {
         ...prev.skillsConfidence,
-        [skillId]: value[0]
+        [skillId]: value
       }
     }));
   };
@@ -145,12 +149,12 @@ const QuestionnairePage = () => {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep === 1) {
       if (selectedSubjects.length === 0) return;
       
       // Save subjects and move to next question with animation
-      setAnswers(prev => ({ ...prev, subjects: selectedSubjects }));
+      setAnswers(prev => ({ ...prev, interests: selectedSubjects }));
       setTimeout(() => setCurrentStep(2), 100);
     } else if (currentStep === 2) {
       if (!answers.workStyle) return;
@@ -165,12 +169,39 @@ const QuestionnairePage = () => {
     } else if (currentStep === 5) {
       if (answers.academicStrengths.length === 0) return;
       
-      // Save final academic strengths with success animation
-      setAnswers(prev => ({ ...prev, academicStrengths: prev.academicStrengths }));
-      console.log("Final answers:", answers);
-      
-      // Add completion animation before navigation
-      setTimeout(() => navigate("/results"), 800);
+      // Questionnaire complete, generate recommendations
+      setIsLoading(true);
+      try {
+        const finalAnswers = {
+          ...answers,
+          interests: selectedSubjects,
+          academicStrengths: answers.academicStrengths
+        };
+
+        const response = await supabase.functions.invoke('generate-recommendations', {
+          body: { answers: finalAnswers }
+        });
+
+        if (response.error) {
+          throw new Error(response.error.message);
+        }
+
+        // Navigate to results with the recommendations
+        navigate('/results', { 
+          state: { 
+            recommendations: response.data,
+            answers: finalAnswers
+          } 
+        });
+      } catch (error) {
+        console.error('Error generating recommendations:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate recommendations. Please try again.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+      }
     }
   };
 
@@ -474,11 +505,11 @@ const QuestionnairePage = () => {
                         </div>
                       </div>
                       <div className="text-2xl font-bold text-primary min-w-16 text-center bg-primary/10 rounded-2xl px-4 py-2 shadow-soft">
-                        {answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence]}
+                        {answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence][0]}
                       </div>
                     </div>
                     <Slider
-                      value={[answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence]]}
+                      value={answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence]}
                       onValueChange={(value) => handleSkillConfidenceChange(skill.id, value)}
                       max={5}
                       min={1}
@@ -650,10 +681,15 @@ const QuestionnairePage = () => {
             
             <Button
               onClick={handleNext}
-              disabled={!canProceed()}
+              disabled={!canProceed() || isLoading}
               className="gradient-primary text-white rounded-2xl px-12 py-6 text-xl font-bold shadow-large hover:shadow-xl hover:scale-105 transition-all duration-300 border-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              {currentStep === 5 ? (
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                  Generating Your Results...
+                </>
+              ) : currentStep === 5 ? (
                 <>
                   <Trophy className="w-6 h-6 mr-3" />
                   Finish Quiz

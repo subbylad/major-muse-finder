@@ -1,59 +1,72 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, RotateCcw, Save, Trophy, Sparkles, Star, Award, Crown, Medal, PartyPopper, Share } from "lucide-react";
+import { CheckCircle, RotateCcw, Save, Trophy, Sparkles, Star, Award, Crown, Medal, PartyPopper, Share, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const ResultsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [animateProgress, setAnimateProgress] = useState(false);
   const [showCards, setShowCards] = useState(false);
 
+  // Get recommendations from navigation state
+  const recommendations = location.state?.recommendations?.recommendations || null;
+  const answers = location.state?.answers || null;
+  const summary = location.state?.recommendations?.summary || null;
+  const hasError = location.state?.recommendations?.error || false;
+
   useEffect(() => {
+    // If no recommendations, redirect to questionnaire
+    if (!recommendations && !hasError) {
+      navigate('/questionnaire');
+      return;
+    }
+    
     // Trigger animations with delay for dramatic effect
     setTimeout(() => setAnimateProgress(true), 500);
     setTimeout(() => setShowCards(true), 1000);
-  }, []);
+  }, [recommendations, hasError, navigate]);
 
-  // Mock recommendations with enhanced data for celebration
-  const recommendations = [
-    {
-      major: "Computer Science",
-      match: 92,
-      icon: Crown,
-      achievement: "Tech Innovator",
-      description: "Your strong technical skills, problem-solving abilities, and interest in technology make this an excellent fit. High earning potential and growing job market.",
-      detailedExplanation: "You've demonstrated exceptional logical thinking and technical aptitude. Computer Science offers endless opportunities in AI, software development, cybersecurity, and emerging technologies.",
-      reasons: ["High technical confidence", "Problem-solving strength", "Technology interest"],
-      matchLevel: "Perfect Match",
-      color: "from-success to-success/80"
-    },
-    {
-      major: "Business Administration", 
-      match: 87,
-      icon: Trophy,
-      achievement: "Future Leader",
-      description: "Your leadership qualities, communication skills, and interest in career advancement align well with business studies. Versatile degree with many career paths.",
-      detailedExplanation: "Your natural leadership abilities and strategic thinking make you perfect for business. This degree opens doors to management, entrepreneurship, consulting, and executive roles.",
-      reasons: ["Leadership confidence", "Communication skills", "Career growth focus"],
-      matchLevel: "Excellent Match",
-      color: "from-primary to-primary/80"
-    },
-    {
-      major: "Data Science",
-      match: 81,
-      icon: Medal,
-      achievement: "Data Detective",
-      description: "Combines your mathematical abilities with technology interests. Perfect for analytical minds who want to solve real-world problems with data.",
-      detailedExplanation: "Your analytical mindset and mathematical skills are perfect for the data revolution. Help companies make decisions, predict trends, and solve complex problems through data analysis.",
-      reasons: ["Math strengths", "Analytical thinking", "Technology focus"],
-      matchLevel: "Great Match",
-      color: "from-orange-accent to-orange-accent/80"
-    }
-  ];
+  // Helper function to get icon for recommendations
+  const getIconForMajor = (major: string) => {
+    const majorLower = major.toLowerCase();
+    if (majorLower.includes('computer') || majorLower.includes('software') || majorLower.includes('technology')) return Crown;
+    if (majorLower.includes('business') || majorLower.includes('management') || majorLower.includes('marketing')) return Trophy;
+    if (majorLower.includes('data') || majorLower.includes('statistics') || majorLower.includes('analytics')) return Medal;
+    if (majorLower.includes('engineering')) return Sparkles;
+    if (majorLower.includes('science') || majorLower.includes('research')) return Star;
+    return Award; // Default icon
+  };
+
+  // Helper function to get achievement name
+  const getAchievementForMajor = (major: string) => {
+    const majorLower = major.toLowerCase();
+    if (majorLower.includes('computer') || majorLower.includes('software')) return "Tech Innovator";
+    if (majorLower.includes('business') || majorLower.includes('management')) return "Future Leader";
+    if (majorLower.includes('data') || majorLower.includes('analytics')) return "Data Detective";
+    if (majorLower.includes('engineering')) return "Problem Solver";
+    if (majorLower.includes('science')) return "Research Pioneer";
+    return "Career Champion";
+  };
+
+  // Helper function to get color scheme
+  const getColorForConfidence = (confidence: number) => {
+    if (confidence >= 90) return "from-success to-success/80";
+    if (confidence >= 80) return "from-primary to-primary/80";
+    return "from-orange-accent to-orange-accent/80";
+  };
+
+  // Helper function to get match level
+  const getMatchLevel = (confidence: number) => {
+    if (confidence >= 90) return "Perfect Match";
+    if (confidence >= 85) return "Excellent Match";
+    if (confidence >= 80) return "Great Match";
+    return "Good Match";
+  };
 
   const handleRetakeQuiz = () => {
     navigate("/questionnaire");
@@ -86,6 +99,26 @@ const ResultsPage = () => {
     if (percentage >= 80) return "bg-primary/10 border-primary/20";
     return "bg-orange-accent/10 border-orange-accent/20";
   };
+
+  // Show error state if there was an error generating recommendations
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-orange-accent/10 p-4 sm:p-6 flex items-center justify-center">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center">
+            <AlertCircle className="w-12 h-12 text-orange-accent mx-auto mb-4" />
+            <h2 className="text-xl font-bold mb-2">Unable to Generate Recommendations</h2>
+            <p className="text-muted-foreground mb-4">
+              We encountered an issue generating your personalized recommendations. Please try again.
+            </p>
+            <Button onClick={() => navigate('/questionnaire')} className="w-full">
+              Retake Questionnaire
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-orange-accent/10 p-4 sm:p-6 relative overflow-hidden">
@@ -123,20 +156,24 @@ const ResultsPage = () => {
           </h2>
           
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed animate-fade-in px-4" style={{ animationDelay: '0.6s' }}>
-            🌟 Congratulations! We've analyzed your unique strengths, interests, and goals to discover your perfect academic matches. These aren't just suggestions—they're your pathway to success.
+            🌟 {summary || "Congratulations! We've analyzed your unique strengths, interests, and goals to discover your perfect academic matches. These aren't just suggestions—they're your pathway to success."}
           </p>
         </div>
 
         {/* Achievement Cards - Mobile Optimized */}
         <div className="space-y-6 sm:space-y-8 mb-8 sm:mb-12">
-          {recommendations.map((rec, index) => {
-            const Icon = rec.icon;
+          {recommendations?.map((rec: any, index: number) => {
+            const Icon = getIconForMajor(rec.major);
+            const achievement = getAchievementForMajor(rec.major);
+            const color = getColorForConfidence(rec.confidence);
+            const matchLevel = getMatchLevel(rec.confidence);
+            
             return (
               <Card 
                 key={rec.major} 
                 className={`
                   ${showCards ? 'animate-fade-in animate-scale-in' : 'opacity-0'} 
-                  bg-gradient-to-br ${rec.color} 
+                  bg-gradient-to-br ${color} 
                   shadow-large hover:shadow-xl 
                   transition-all duration-500 
                   border-2 border-white/20
@@ -161,16 +198,16 @@ const ResultsPage = () => {
                           {rec.major}
                         </CardTitle>
                         <p className="text-white/80 font-medium text-sm sm:text-lg">
-                          🏆 {rec.achievement}
+                          🏆 {achievement}
                         </p>
                       </div>
                     </div>
                     <div className="text-left sm:text-right w-full sm:w-auto">
                       <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">
-                        {rec.match}%
+                        {rec.confidence}%
                       </div>
                       <p className="text-white/80 text-xs sm:text-sm font-medium">
-                        {rec.matchLevel}
+                        {matchLevel}
                       </p>
                     </div>
                   </div>
@@ -179,10 +216,10 @@ const ResultsPage = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-white/80 text-xs sm:text-sm">
                       <span>Compatibility Score</span>
-                      <span>{rec.match}%</span>
+                      <span>{rec.confidence}%</span>
                     </div>
                     <Progress 
-                      value={animateProgress ? rec.match : 0} 
+                      value={animateProgress ? rec.confidence : 0} 
                       className="h-2 sm:h-3 bg-white/20"
                     />
                   </div>
@@ -191,26 +228,35 @@ const ResultsPage = () => {
                 <CardContent className="space-y-4 sm:space-y-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20">
                     <p className="text-white/90 leading-relaxed text-sm sm:text-base md:text-lg">
-                      {rec.description}
+                      {rec.reasoning}
                     </p>
                   </div>
 
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20">
                     <h4 className="text-white font-semibold mb-2 text-base sm:text-lg">Why This Is Perfect For You:</h4>
                     <p className="text-white/90 leading-relaxed text-sm sm:text-base">
-                      {rec.detailedExplanation}
+                      {rec.why_good_fit}
                     </p>
                   </div>
+
+                  {rec.considerations && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 border border-white/20">
+                      <h4 className="text-white font-semibold mb-2 text-base sm:text-lg">Things to Consider:</h4>
+                      <p className="text-white/90 leading-relaxed text-sm sm:text-base">
+                        {rec.considerations}
+                      </p>
+                    </div>
+                  )}
                   
                   <div className="space-y-2 sm:space-y-3">
-                    <p className="text-white font-medium text-sm sm:text-base md:text-lg">🌟 Your Strengths That Led Here:</p>
-                    <div className="grid grid-cols-1 gap-2 sm:gap-3">
-                      {rec.reasons.map((reason, idx) => (
+                    <p className="text-white font-medium text-sm sm:text-base md:text-lg">🌟 Career Paths:</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                      {rec.career_paths?.map((career: string, idx: number) => (
                         <div
                           key={idx}
                           className="px-3 sm:px-4 py-2 sm:py-3 bg-white/20 backdrop-blur-sm rounded-full text-white text-center font-medium border border-white/30 hover:bg-white/30 transition-colors text-sm sm:text-base min-h-[44px] flex items-center justify-center touch-manipulation"
                         >
-                          ✨ {reason}
+                          ✨ {career}
                         </div>
                       ))}
                     </div>
