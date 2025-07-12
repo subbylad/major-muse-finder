@@ -8,53 +8,53 @@ All colors MUST be HSL for consistency.
 
 @layer base {
   :root {
-    /* Modern warm neutrals - inspired by Linear/Notion */
-    --background: 0 0% 99%;
-    --foreground: 215 25% 27%;
+    /* SKIMS-inspired warm cream/brown palette */
+    --background: 35 25% 97%;
+    --foreground: 25 15% 20%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 27%;
+    --card: 30 20% 95%;
+    --card-foreground: 25 15% 20%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 27%;
+    --popover: 30 20% 95%;
+    --popover-foreground: 25 15% 20%;
 
-    /* Warm, friendly primary - sophisticated blue-purple */
-    --primary: 250 84% 54%;
-    --primary-foreground: 0 0% 100%;
-    --primary-variant: 250 84% 64%;
+    /* Warm chocolate brown primary */
+    --primary: 25 35% 45%;
+    --primary-foreground: 35 25% 97%;
+    --primary-variant: 30 40% 55%;
     
-    /* Vibrant success - modern green */
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
+    /* Muted green success */
+    --success: 140 30% 40%;
+    --success-foreground: 35 25% 97%;
     
-    /* Warm accent - friendly orange */
-    --orange-accent: 25 95% 53%;
-    --orange-accent-foreground: 0 0% 100%;
+    /* Warm caramel accent */
+    --orange-accent: 35 50% 60%;
+    --orange-accent-foreground: 25 15% 20%;
     
-    /* Modern purple accent */
-    --purple-accent: 269 87% 66%;
-    --purple-accent-foreground: 0 0% 100%;
+    /* Soft dusty rose accent */
+    --purple-accent: 340 25% 70%;
+    --purple-accent-foreground: 25 15% 20%;
 
-    /* Sophisticated secondary */
-    --secondary: 215 16% 95%;
-    --secondary-foreground: 215 25% 27%;
+    /* Warm secondary */
+    --secondary: 35 20% 88%;
+    --secondary-foreground: 25 15% 25%;
 
-    /* Refined muted tones */
-    --muted: 215 16% 96.5%;
-    --muted-foreground: 215 13% 54%;
+    /* Cream muted tones */
+    --muted: 35 15% 90%;
+    --muted-foreground: 30 10% 45%;
 
-    /* Subtle accent */
-    --accent: 215 20% 94%;
-    --accent-foreground: 215 25% 27%;
+    /* Subtle warm accent */
+    --accent: 30 15% 85%;
+    --accent-foreground: 25 15% 25%;
 
-    /* Modern destructive */
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    /* Soft destructive */
+    --destructive: 0 50% 55%;
+    --destructive-foreground: 35 25% 97%;
 
-    /* Clean borders and inputs */
-    --border: 215 12% 89%;
-    --input: 215 12% 89%;
-    --ring: 250 84% 54%;
+    /* Warm borders */
+    --border: 35 15% 82%;
+    --input: 35 15% 82%;
+    --ring: 25 35% 45%;
 
     /* Modern radius for contemporary feel */
     --radius: 0.75rem;
@@ -78,45 +78,45 @@ All colors MUST be HSL for consistency.
   }
 
   .dark {
-    /* Dark mode with warm undertones */
-    --background: 215 28% 9%;
-    --foreground: 213 31% 91%;
+    /* Dark mode with warm brown undertones */
+    --background: 25 20% 10%;
+    --foreground: 35 15% 85%;
 
-    --card: 215 28% 10%;
-    --card-foreground: 213 31% 91%;
+    --card: 25 20% 12%;
+    --card-foreground: 35 15% 85%;
 
-    --popover: 215 28% 10%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 25 20% 12%;
+    --popover-foreground: 35 15% 85%;
 
-    /* Brighter primary for dark mode */
-    --primary: 250 84% 60%;
-    --primary-foreground: 215 28% 9%;
-    --primary-variant: 250 84% 70%;
+    /* Lighter brown for dark mode */
+    --primary: 30 45% 55%;
+    --primary-foreground: 25 20% 10%;
+    --primary-variant: 35 50% 65%;
 
-    --success: 142 69% 58%;
-    --success-foreground: 215 28% 9%;
+    --success: 140 35% 50%;
+    --success-foreground: 25 20% 10%;
 
-    --orange-accent: 25 95% 58%;
-    --orange-accent-foreground: 215 28% 9%;
+    --orange-accent: 35 55% 65%;
+    --orange-accent-foreground: 25 20% 10%;
 
-    --purple-accent: 269 87% 72%;
-    --purple-accent-foreground: 215 28% 9%;
+    --purple-accent: 340 30% 75%;
+    --purple-accent-foreground: 25 20% 10%;
 
-    --secondary: 215 28% 14%;
-    --secondary-foreground: 213 31% 91%;
+    --secondary: 25 15% 18%;
+    --secondary-foreground: 35 15% 85%;
 
-    --muted: 215 28% 14%;
-    --muted-foreground: 215 15% 57.5%;
+    --muted: 25 15% 18%;
+    --muted-foreground: 30 10% 60%;
 
-    --accent: 215 28% 14%;
-    --accent-foreground: 213 31% 91%;
+    --accent: 25 15% 22%;
+    --accent-foreground: 35 15% 85%;
 
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 213 31% 91%;
+    --destructive: 0 55% 55%;
+    --destructive-foreground: 35 15% 85%;
 
-    --border: 215 28% 18%;
-    --input: 215 28% 18%;
-    --ring: 250 84% 60%;
+    --border: 25 15% 20%;
+    --input: 25 15% 20%;
+    --ring: 30 45% 55%;
 
     --sidebar-background: 215 28% 10%;
     --sidebar-foreground: 213 31% 91%;
