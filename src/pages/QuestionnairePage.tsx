@@ -210,12 +210,107 @@ const QuestionnairePage = () => {
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-12">
-          <div className="flex justify-between items-center mb-3">
-            <span className="font-semibold text-foreground">Progress</span>
-            <span className="text-muted-foreground font-medium">{Math.round(progressPercentage)}%</span>
+        <div className="mb-16">
+          {/* Progress Header */}
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold text-foreground mb-2">Your Progress</h3>
+            <p className="text-lg text-muted-foreground">
+              Step {currentStep} of {totalSteps} • {Math.round(progressPercentage)}% Complete
+            </p>
           </div>
-          <Progress value={progressPercentage} className="h-3 rounded-full" />
+          
+          {/* Visual Progress Steps */}
+          <div className="relative max-w-2xl mx-auto">
+            {/* Progress Line Background */}
+            <div className="absolute top-8 left-0 right-0 h-1 bg-border rounded-full mx-8"></div>
+            
+            {/* Animated Progress Line */}
+            <div 
+              className="absolute top-8 left-0 h-1 bg-gradient-to-r from-primary to-purple-accent rounded-full mx-8 transition-all duration-700 ease-out"
+              style={{ width: `calc(${progressPercentage}% - 64px)` }}
+            ></div>
+            
+            {/* Step Circles */}
+            <div className="flex justify-between relative z-10">
+              {Array.from({ length: totalSteps }, (_, index) => {
+                const stepNumber = index + 1;
+                const isCompleted = stepNumber < currentStep;
+                const isCurrent = stepNumber === currentStep;
+                const isUpcoming = stepNumber > currentStep;
+                
+                return (
+                  <div
+                    key={stepNumber}
+                    className={`relative flex flex-col items-center transition-all duration-500 ${
+                      isCurrent ? 'scale-110' : ''
+                    }`}
+                  >
+                    {/* Step Circle */}
+                    <div
+                      className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-lg border-4 transition-all duration-500 ${
+                        isCompleted
+                          ? 'bg-success text-success-foreground border-success shadow-lg'
+                          : isCurrent
+                          ? 'bg-primary text-primary-foreground border-primary shadow-large animate-pulse'
+                          : 'bg-background text-muted-foreground border-border'
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        stepNumber
+                      )}
+                    </div>
+                    
+                    {/* Step Label */}
+                    <div className={`mt-3 text-center transition-all duration-300 ${
+                      isCurrent ? 'text-primary font-semibold' : 'text-muted-foreground'
+                    }`}>
+                      <div className="text-sm font-medium">
+                        {stepNumber === 1 && 'Interests'}
+                        {stepNumber === 2 && 'Work Style'}
+                        {stepNumber === 3 && 'Skills'}
+                        {stepNumber === 4 && 'Values'}
+                        {stepNumber === 5 && 'Strengths'}
+                      </div>
+                    </div>
+                    
+                    {/* Completion Sparkle Effect */}
+                    {isCompleted && (
+                      <div className="absolute -top-2 -right-2 w-6 h-6 animate-bounce">
+                        <div className="w-full h-full bg-orange-accent rounded-full flex items-center justify-center">
+                          <svg className="w-3 h-3 text-orange-accent-foreground" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Encouraging Message */}
+          <div className="text-center mt-8">
+            {currentStep === 1 && (
+              <p className="text-muted-foreground">🚀 Let's discover your interests!</p>
+            )}
+            {currentStep === 2 && (
+              <p className="text-muted-foreground">💪 Great start! Now about your work style...</p>
+            )}
+            {currentStep === 3 && (
+              <p className="text-muted-foreground">⭐ Awesome! Let's explore your skills...</p>
+            )}
+            {currentStep === 4 && (
+              <p className="text-muted-foreground">🎯 Amazing progress! What drives you?</p>
+            )}
+            {currentStep === 5 && (
+              <p className="text-muted-foreground">🏆 Almost there! Your academic strengths...</p>
+            )}
+          </div>
         </div>
 
         {/* Question Card */}
