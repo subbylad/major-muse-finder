@@ -156,9 +156,12 @@ const QuestionnairePage = () => {
     } else if (currentStep === 5) {
       if (answers.academicStrengths.length === 0) return;
       
+      // Save final academic strengths
+      setAnswers(prev => ({ ...prev, academicStrengths: prev.academicStrengths }));
       console.log("Final answers:", answers);
-      // TODO: Navigate to results page
-      alert("Quiz completed! Generating your major recommendations...");
+      
+      // Navigate to results page
+      navigate("/results");
     }
   };
 
