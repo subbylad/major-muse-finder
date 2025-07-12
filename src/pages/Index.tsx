@@ -1,11 +1,13 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { GraduationCap, Target, Compass, Users } from "lucide-react";
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   const handleGetStarted = () => {
-    // Navigate to questionnaire (placeholder for now)
-    console.log("Starting questionnaire...");
+    navigate("/auth");
   };
 
   return (
