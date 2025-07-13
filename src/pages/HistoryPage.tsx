@@ -131,13 +131,21 @@ const HistoryPage = () => {
             Back to Home
           </Button>
           
-          <Button
-            onClick={() => navigate("/questionnaire")}
-            className="gradient-primary text-white"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Take New Quiz
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/profile")}
+            >
+              Account
+            </Button>
+            <Button
+              onClick={() => navigate("/questionnaire")}
+              className="gradient-primary text-white"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Take New Quiz
+            </Button>
+          </div>
         </div>
 
         <div className="text-center mb-12">

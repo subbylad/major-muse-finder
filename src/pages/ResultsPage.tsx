@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, RotateCcw, Save, Trophy, Sparkles, Star, Award, Crown, Medal, PartyPopper, Share, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const ResultsPage = () => {
   const navigate = useNavigate();
@@ -68,8 +69,25 @@ const ResultsPage = () => {
     return "Good Match";
   };
 
-  const handleRetakeQuiz = () => {
-    navigate("/questionnaire");
+  const handleRetakeQuiz = async () => {
+    // Check if user has previous results for comparison
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: previousResults } = await supabase
+        .from('recommendations')
+        .select('recommendations')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(2);
+      
+      if (previousResults && previousResults.length > 1) {
+        toast({
+          title: "📈 Ready for comparison!",
+          description: "Your new results will be compared to your previous attempt.",
+        });
+      }
+    }
+    navigate('/questionnaire');
   };
 
   const handleSaveResults = () => {

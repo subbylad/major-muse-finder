@@ -74,6 +74,14 @@ const Index = () => {
                 </Button>
                 <Button
                   variant="ghost"
+                  onClick={() => navigate("/profile")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={handleSignOut}
                   className="text-muted-foreground hover:text-foreground"
                 >
