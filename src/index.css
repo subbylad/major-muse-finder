@@ -2,62 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modern design system inspired by Linear and Notion
-All colors MUST be HSL for consistency.
+/* Minimal design system inspired by world.org
+Clean, spacious, and modern with minimal color palette.
 */
 
 @layer base {
   :root {
-    /* SKIMS-inspired warm cream/brown palette */
-    --background: 35 25% 97%;
-    --foreground: 25 15% 20%;
+    /* Clean white/gray minimal palette */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 5%;
 
-    --card: 30 20% 95%;
-    --card-foreground: 25 15% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 5%;
 
-    --popover: 30 20% 95%;
-    --popover-foreground: 25 15% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 5%;
 
-    /* Warm chocolate brown primary */
-    --primary: 25 35% 45%;
-    --primary-foreground: 35 25% 97%;
-    --primary-variant: 30 40% 55%;
+    /* Minimal black primary */
+    --primary: 0 0% 5%;
+    --primary-foreground: 0 0% 100%;
+    --primary-variant: 0 0% 15%;
     
-    /* Muted green success */
-    --success: 140 30% 40%;
-    --success-foreground: 35 25% 97%;
+    /* Subtle green success */
+    --success: 120 50% 45%;
+    --success-foreground: 0 0% 100%;
     
-    /* Warm caramel accent */
-    --orange-accent: 35 50% 60%;
-    --orange-accent-foreground: 25 15% 20%;
+    /* Minimal gray accent */
+    --orange-accent: 0 0% 25%;
+    --orange-accent-foreground: 0 0% 100%;
     
-    /* Soft dusty rose accent */
-    --purple-accent: 340 25% 70%;
-    --purple-accent-foreground: 25 15% 20%;
+    /* Light gray accent */
+    --purple-accent: 0 0% 70%;
+    --purple-accent-foreground: 0 0% 5%;
 
-    /* Warm secondary */
-    --secondary: 35 20% 88%;
-    --secondary-foreground: 25 15% 25%;
+    /* Light gray secondary */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 5%;
 
-    /* Cream muted tones */
-    --muted: 35 15% 90%;
-    --muted-foreground: 30 10% 45%;
+    /* Subtle gray muted tones */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Subtle warm accent */
-    --accent: 30 15% 85%;
-    --accent-foreground: 25 15% 25%;
+    /* Very light gray accent */
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 5%;
 
-    /* Soft destructive */
-    --destructive: 0 50% 55%;
-    --destructive-foreground: 35 25% 97%;
+    /* Red destructive */
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Warm borders */
-    --border: 35 15% 82%;
-    --input: 35 15% 82%;
-    --ring: 25 35% 45%;
+    /* Minimal borders */
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 5%;
 
-    /* Modern radius for contemporary feel */
-    --radius: 0.75rem;
+    /* Minimal radius for clean feel */
+    --radius: 0.5rem;
 
     /* Sidebar colors for modern navigation */
     --sidebar-background: 0 0% 100%;
@@ -78,45 +78,45 @@ All colors MUST be HSL for consistency.
   }
 
   .dark {
-    /* Dark mode with warm brown undertones */
-    --background: 25 20% 10%;
-    --foreground: 35 15% 85%;
+    /* Minimal dark mode */
+    --background: 0 0% 3%;
+    --foreground: 0 0% 98%;
 
-    --card: 25 20% 12%;
-    --card-foreground: 35 15% 85%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 25 20% 12%;
-    --popover-foreground: 35 15% 85%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Lighter brown for dark mode */
-    --primary: 30 45% 55%;
-    --primary-foreground: 25 20% 10%;
-    --primary-variant: 35 50% 65%;
+    /* White primary for dark mode */
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 3%;
+    --primary-variant: 0 0% 85%;
 
-    --success: 140 35% 50%;
-    --success-foreground: 25 20% 10%;
+    --success: 120 50% 50%;
+    --success-foreground: 0 0% 3%;
 
-    --orange-accent: 35 55% 65%;
-    --orange-accent-foreground: 25 20% 10%;
+    --orange-accent: 0 0% 75%;
+    --orange-accent-foreground: 0 0% 3%;
 
-    --purple-accent: 340 30% 75%;
-    --purple-accent-foreground: 25 20% 10%;
+    --purple-accent: 0 0% 30%;
+    --purple-accent-foreground: 0 0% 98%;
 
-    --secondary: 25 15% 18%;
-    --secondary-foreground: 35 15% 85%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 25 15% 18%;
-    --muted-foreground: 30 10% 60%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 25 15% 22%;
-    --accent-foreground: 35 15% 85%;
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 55% 55%;
-    --destructive-foreground: 35 15% 85%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 25 15% 20%;
-    --input: 25 15% 20%;
-    --ring: 30 45% 55%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 98%;
 
     --sidebar-background: 215 28% 10%;
     --sidebar-foreground: 213 31% 91%;
@@ -143,22 +143,33 @@ All colors MUST be HSL for consistency.
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold;
+    @apply font-normal tracking-tight;
+    font-weight: 500;
   }
   
   h1 {
-    @apply text-4xl md:text-5xl lg:text-6xl;
+    @apply text-5xl md:text-6xl lg:text-7xl;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
   }
   
   h2 {
-    @apply text-2xl md:text-3xl lg:text-4xl;
+    @apply text-3xl md:text-4xl lg:text-5xl;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
   }
   
   h3 {
-    @apply text-xl md:text-2xl;
+    @apply text-2xl md:text-3xl;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
   }
 }
 
@@ -184,9 +195,9 @@ All colors MUST be HSL for consistency.
     box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.15), 0 16px 40px -12px rgba(0, 0, 0, 0.2);
   }
   
-  /* Modern gradient backgrounds */
+  /* Minimal gradient backgrounds */
   .gradient-warm {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.03) 0%, hsl(var(--orange-accent) / 0.03) 50%, hsl(var(--purple-accent) / 0.02) 100%);
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted) / 0.3) 100%);
   }
   
   .gradient-primary {

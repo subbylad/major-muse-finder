@@ -2,19 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthCheck } from "@/hooks/useAuthCheck";
+import { getUserDataForExport } from "@/lib/database";
+import { PageHeader } from "@/components/common/PageHeader";
+import { PageLoading } from "@/components/common/PageLoading";
+import { LoadingButton } from "@/components/common/LoadingButton";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ArrowLeft, User, Mail, Key, Download, Trash2, History, PenTool, Loader2 } from "lucide-react";
+import { Download, Trash2, History } from "lucide-react";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading } = useAuthCheck();
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -26,19 +28,10 @@ const ProfilePage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/auth');
-        return;
-      }
-      setUser(user);
-      setNewEmail(user.email || "");
-      setIsLoading(false);
-    };
-    
-    checkAuth();
-  }, [navigate]);
+    if (user?.email) {
+      setNewEmail(user.email);
+    }
+  }, [user]);
 
   const handleUpdateEmail = async () => {
     if (!newEmail || newEmail === user?.email) return;
@@ -109,35 +102,14 @@ const ProfilePage = () => {
   const handleExportData = async () => {
     setIsExporting(true);
     try {
-      // Get user's questionnaire responses
-      const { data: responses, error: responsesError } = await supabase
-        .from('questionnaire_responses')
-        .select('*')
-        .eq('user_id', user.id);
+      // Get all user data in a single optimized query
+      const { data, error } = await getUserDataForExport(user.id);
       
-      if (responsesError) throw responsesError;
-      
-      // Get user's recommendations
-      const { data: recommendations, error: recommendationsError } = await supabase
-        .from('recommendations')
-        .select('*')
-        .eq('user_id', user.id);
-      
-      if (recommendationsError) throw recommendationsError;
-      
-      // Get user profile
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (profileError && profileError.code !== 'PGRST116') throw profileError;
+      if (error) throw error;
       
       const exportData = {
-        profile: profile || { email: user.email },
-        questionnaire_responses: responses || [],
-        recommendations: recommendations || [],
+        profile: { email: user.email },
+        questionnaire_responses: data || [],
         exported_at: new Date().toISOString()
       };
       
@@ -200,68 +172,43 @@ const ProfilePage = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen gradient-warm flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading your profile...</p>
-        </div>
-      </div>
-    );
+    return <PageLoading message="Loading your profile..." />;
   }
 
   return (
-    <div className="min-h-screen gradient-warm">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-          
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/history")}
-            >
-              <History className="w-4 h-4 mr-2" />
-              View History
-            </Button>
-            <Button
-              onClick={() => navigate("/questionnaire")}
-              className="gradient-primary text-white"
-            >
-              <PenTool className="w-4 h-4 mr-2" />
-              Take Quiz
-            </Button>
-          </div>
-        </div>
-
-        <div className="text-center mb-12">
-          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <User className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold mb-4 text-primary">Account Settings</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Manage your account information and preferences.
-          </p>
-        </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-8 py-8 max-w-4xl">
+        <PageHeader
+          title="Account Settings"
+          subtitle="Manage your account information and preferences."
+          onBack={() => navigate("/")}
+          rightContent={
+            <div className="flex gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/history")}
+                className="text-muted-foreground hover:text-foreground font-normal"
+              >
+                <History className="w-4 h-4 mr-2" />
+                History
+              </Button>
+              <Button
+                onClick={() => navigate("/questionnaire")}
+                className="bg-primary text-primary-foreground px-4 py-2 text-sm font-normal rounded-lg transition-all duration-200 hover:bg-primary/90"
+              >
+                Take Quiz
+              </Button>
+            </div>
+          }
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Email Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="w-5 h-5" />
-                Email Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="border border-border rounded-lg p-6">
+            <h2 className="text-xl font-normal text-foreground mb-6">
+              Email Settings
+            </h2>
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="current-email">Current Email</Label>
                 <Input
@@ -281,32 +228,24 @@ const ProfilePage = () => {
                   placeholder="Enter new email address"
                 />
               </div>
-              <Button
+              <LoadingButton
                 onClick={handleUpdateEmail}
-                disabled={isUpdatingEmail || !newEmail || newEmail === user?.email}
-                className="w-full"
+                isLoading={isUpdatingEmail}
+                disabled={!newEmail || newEmail === user?.email}
+                loadingText="Updating..."
+                className="w-full bg-primary text-primary-foreground px-4 py-2 text-sm font-normal rounded-lg transition-all duration-200 hover:bg-primary/90"
               >
-                {isUpdatingEmail ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  "Update Email"
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+                Update Email
+              </LoadingButton>
+            </div>
+          </div>
 
           {/* Password Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="w-5 h-5" />
-                Password Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="border border-border rounded-lg p-6">
+            <h2 className="text-xl font-normal text-foreground mb-6">
+              Password Settings
+            </h2>
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="new-password">New Password</Label>
                 <Input
@@ -327,71 +266,62 @@ const ProfilePage = () => {
                   placeholder="Confirm new password"
                 />
               </div>
-              <Button
+              <LoadingButton
                 onClick={handleUpdatePassword}
-                disabled={isUpdatingPassword || !newPassword || newPassword !== confirmPassword}
-                className="w-full"
+                isLoading={isUpdatingPassword}
+                disabled={!newPassword || newPassword !== confirmPassword}
+                loadingText="Updating..."
+                className="w-full bg-primary text-primary-foreground px-4 py-2 text-sm font-normal rounded-lg transition-all duration-200 hover:bg-primary/90"
               >
-                {isUpdatingPassword ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  "Update Password"
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+                Update Password
+              </LoadingButton>
+            </div>
+          </div>
         </div>
 
         {/* Data Management */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Data Management</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <div className="border border-border rounded-lg p-6 mt-8">
+          <h2 className="text-xl font-normal text-foreground mb-6">
+            Data Management
+          </h2>
+          <div className="space-y-6">
             {/* Export Data */}
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex items-center justify-between p-4 border border-border rounded-lg">
               <div>
-                <h3 className="font-semibold">Export Your Data</h3>
+                <h3 className="font-normal text-foreground">Export Your Data</h3>
                 <p className="text-sm text-muted-foreground">
                   Download all your questionnaire responses and recommendations as a JSON file.
                 </p>
               </div>
-              <Button
+              <LoadingButton
                 variant="outline"
                 onClick={handleExportData}
-                disabled={isExporting}
+                isLoading={isExporting}
+                loadingText="Exporting..."
+                className="border border-border text-foreground hover:bg-muted px-4 py-2 text-sm font-normal rounded-lg transition-all duration-200"
               >
-                {isExporting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Exporting...
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Data
-                  </>
-                )}
-              </Button>
+                <Download className="w-4 h-4 mr-2" />
+                Export Data
+              </LoadingButton>
             </div>
 
-            <Separator />
+            <div className="w-full h-px bg-border" />
 
             {/* Delete Account */}
             <div className="flex items-center justify-between p-4 border border-destructive/20 rounded-lg">
               <div>
-                <h3 className="font-semibold text-destructive">Delete Account</h3>
+                <h3 className="font-normal text-destructive">Delete Account</h3>
                 <p className="text-sm text-muted-foreground">
                   Permanently delete your account and all associated data. This action cannot be undone.
                 </p>
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" disabled={isDeletingAccount}>
-                    <Trash2 className="w-4 h-4 mr-2" />
+                  <Button 
+                    variant="destructive" 
+                    disabled={isDeletingAccount}
+                    className="bg-destructive text-destructive-foreground px-4 py-2 text-sm font-normal rounded-lg transition-all duration-200 hover:bg-destructive/90"
+                  >
                     Delete Account
                   </Button>
                 </AlertDialogTrigger>
@@ -411,25 +341,22 @@ const ProfilePage = () => {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
+                    <LoadingButton
                       onClick={handleDeleteAccount}
+                      isLoading={isDeletingAccount}
+                      loadingText="Deleting..."
+                      variant="destructive"
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      {isDeletingAccount ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Deleting...
-                        </>
-                      ) : (
-                        "Delete Account"
-                      )}
-                    </AlertDialogAction>
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Account
+                    </LoadingButton>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

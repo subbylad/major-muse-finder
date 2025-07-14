@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -143,36 +142,32 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-warm flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-8">
       <div className="w-full max-w-md">
         {/* Back Button */}
         <Button
           variant="ghost"
           onClick={() => navigate("/")}
-          className="mb-6 text-muted-foreground hover:text-foreground"
+          className="mb-8 text-muted-foreground hover:text-foreground font-normal"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
+          Back
         </Button>
 
-        <Card className="shadow-large border-primary/10">
-          <CardHeader className="text-center pb-8">
-            <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <User className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold">
-              {isSignUp ? "Create Your Account" : "Welcome Back"}
-            </CardTitle>
-            <p className="text-muted-foreground">
+        <div className="border border-border rounded-lg p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl md:text-4xl font-normal mb-2 text-foreground leading-tight tracking-tight">
+              {isSignUp ? "Create Account" : "Welcome Back"}
+            </h1>
+            <p className="text-muted-foreground text-base">
               {isSignUp 
-                ? "Start your journey to discover your perfect major" 
-                : "Sign in to continue your career exploration"
+                ? "Start your career discovery journey" 
+                : "Continue your career exploration"
               }
             </p>
-          </CardHeader>
+          </div>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Field */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
@@ -266,7 +261,7 @@ const AuthPage = () => {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full gradient-primary text-white py-6 text-lg font-semibold"
+                className="w-full bg-primary text-primary-foreground py-3 text-base font-normal rounded-lg transition-all duration-200 hover:bg-primary/90"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -281,22 +276,21 @@ const AuthPage = () => {
 
               {/* Toggle Sign Up/Sign In */}
               <div className="text-center">
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {isSignUp ? "Already have an account?" : "Don't have an account?"}
                 </p>
                 <Button
                   type="button"
                   variant="link"
                   onClick={() => setIsSignUp(!isSignUp)}
-                  className="font-semibold text-primary"
+                  className="font-normal text-foreground underline p-0 h-auto"
                   disabled={isLoading}
                 >
                   {isSignUp ? "Sign in here" : "Create one here"}
                 </Button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   );

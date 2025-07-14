@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuestionnaireState } from "@/hooks/useQuestionnaireState";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,13 +15,9 @@ import { ArrowLeft, ArrowRight, Calculator, FlaskConical, Palette, PenTool, Brie
 const QuestionnairePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { state, actions, canProceed } = useQuestionnaireState();
   
-  // Current step state
-  const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
-  const [isLoading, setIsLoading] = useState(false);
-  const [responseId, setResponseId] = useState<string | null>(null);
-  const [isResumingProgress, setIsResumingProgress] = useState(true);
 
   // Check if user is authenticated and load any existing progress
   useEffect(() => {
@@ -41,7 +38,7 @@ const QuestionnairePage = () => {
 
       if (existingResponse) {
         // Resume existing progress
-        setResponseId(existingResponse.id);
+        actions.setResponseId(existingResponse.id);
         loadProgressFromResponse(existingResponse);
         toast({
           title: "Resuming your progress",
@@ -65,32 +62,15 @@ const QuestionnairePage = () => {
           return;
         }
 
-        setResponseId(newResponse.id);
+        actions.setResponseId(newResponse.id);
       }
       
-      setIsResumingProgress(false);
+      actions.setResumingProgress(false);
     };
     
     checkAuthAndLoadProgress();
-  }, [navigate, toast]);
+  }, [navigate, toast, actions]);
   
-  // All answers storage
-  const [answers, setAnswers] = useState({
-    interests: [] as string[],
-    workStyle: "" as string,
-    skillsConfidence: {
-      problemSolving: [3],
-      creativeThinking: [3],
-      leadership: [3],
-      technicalSkills: [3],
-      communication: [3]
-    },
-    careerValues: [] as string[],
-    academicStrengths: [] as string[]
-  });
-  
-  // Question 1: Subject interests
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   
   const subjectOptions = [
     { id: "math", label: "Math", description: "Numbers, equations, problem-solving", icon: Calculator },
@@ -141,100 +121,57 @@ const QuestionnairePage = () => {
   ];
 
   const handleSubjectToggle = (subjectId: string) => {
-    setSelectedSubjects(prev => {
-      const newSelection = prev.includes(subjectId)
-        ? prev.filter(id => id !== subjectId)
-        : [...prev, subjectId];
-      
-      // Trigger selection animation
-      const element = document.querySelector(`[data-subject="${subjectId}"]`);
-      if (element && !prev.includes(subjectId)) {
-        element.classList.add('selection-bounce');
-        setTimeout(() => element.classList.remove('selection-bounce'), 200);
-      }
-      
-      return newSelection;
-    });
-  };
-
-  const handleWorkStyleChange = (value: string) => {
-    setAnswers(prev => ({ ...prev, workStyle: value }));
-  };
-
-  const handleSkillConfidenceChange = (skillId: string, value: number[]) => {
-    setAnswers(prev => ({
-      ...prev,
-      skillsConfidence: {
-        ...prev.skillsConfidence,
-        [skillId]: value
-      }
-    }));
-  };
-
-  const handleCareerValueToggle = (valueId: string) => {
-    setAnswers(prev => {
-      const currentValues = prev.careerValues;
-      
-      if (currentValues.includes(valueId)) {
-        // Remove if already selected
-        return {
-          ...prev,
-          careerValues: currentValues.filter(id => id !== valueId)
-        };
-      } else if (currentValues.length < 2) {
-        // Add if less than 2 selected
-        return {
-          ...prev,
-          careerValues: [...currentValues, valueId]
-        };
-      }
-      
-      // Don't add if already at maximum
-      return prev;
-    });
+    // Trigger selection animation
+    const element = document.querySelector(`[data-subject="${subjectId}"]`);
+    if (element && !state.selectedSubjects.includes(subjectId)) {
+      element.classList.add('selection-bounce');
+      setTimeout(() => element.classList.remove('selection-bounce'), 200);
+    }
+    
+    actions.toggleSubject(subjectId);
   };
 
   // Load progress from existing response
   const loadProgressFromResponse = (response: any) => {
     let step = 1;
+    const progress: any = {};
     
     if (response.question_1_interests) {
-      setSelectedSubjects(response.question_1_interests);
-      setAnswers(prev => ({ ...prev, interests: response.question_1_interests }));
+      progress.interests = response.question_1_interests;
       step = 2;
     }
     
     if (response.question_2_work_style) {
-      setAnswers(prev => ({ ...prev, workStyle: response.question_2_work_style }));
+      progress.workStyle = response.question_2_work_style;
       step = 3;
     }
     
     if (response.question_3_skills) {
-      setAnswers(prev => ({ ...prev, skillsConfidence: response.question_3_skills }));
+      progress.skillsConfidence = response.question_3_skills;
       step = 4;
     }
     
     if (response.question_4_values) {
-      setAnswers(prev => ({ ...prev, careerValues: response.question_4_values }));
+      progress.careerValues = response.question_4_values;
       step = 5;
     }
     
     if (response.question_5_academic_strengths) {
-      setAnswers(prev => ({ ...prev, academicStrengths: response.question_5_academic_strengths }));
+      progress.academicStrengths = response.question_5_academic_strengths;
     }
     
-    setCurrentStep(step);
+    actions.loadProgress({ ...progress, step });
   };
 
   // Save progress to database
   const saveProgress = async (stepData: any) => {
-    if (!responseId) return;
+    if (!state.responseId) return;
 
     try {
       const { error } = await supabase
         .from('questionnaire_responses')
         .update(stepData)
-        .eq('id', responseId);
+        .eq('id', state.responseId);
 
       if (error) {
         console.error('Error saving progress:', error);
@@ -244,51 +181,50 @@ const QuestionnairePage = () => {
     }
   };
 
+  const handleWorkStyleChange = (value: string) => {
+    actions.setWorkStyle(value);
+  };
+
+  const handleSkillConfidenceChange = (skillId: string, value: number[]) => {
+    actions.setSkillConfidence(skillId, value);
+  };
+
   const handleAcademicStrengthToggle = (strengthId: string) => {
-    setAnswers(prev => ({
-      ...prev,
-      academicStrengths: prev.academicStrengths.includes(strengthId)
-        ? prev.academicStrengths.filter(id => id !== strengthId)
-        : [...prev.academicStrengths, strengthId]
-    }));
+    actions.toggleAcademicStrength(strengthId);
   };
 
   const handleNext = async () => {
-    if (currentStep === 1) {
-      if (selectedSubjects.length === 0) return;
-      
-      // Save subjects and move to next question
-      const updatedAnswers = { ...answers, interests: selectedSubjects };
-      setAnswers(updatedAnswers);
+    if (state.currentStep === 1) {
+      if (state.selectedSubjects.length === 0) return;
       
       // Save to database
-      await saveProgress({ question_1_interests: selectedSubjects });
+      await saveProgress({ question_1_interests: state.selectedSubjects });
       
-      setTimeout(() => setCurrentStep(2), 100);
-    } else if (currentStep === 2) {
-      if (!answers.workStyle) return;
+      setTimeout(() => actions.setCurrentStep(2), 100);
+    } else if (state.currentStep === 2) {
+      if (!state.state.answers.workStyle) return;
       
       // Save work style to database
-      await saveProgress({ question_2_work_style: answers.workStyle });
+      await saveProgress({ question_2_work_style: state.state.answers.workStyle });
       
-      setTimeout(() => setCurrentStep(3), 100);
-    } else if (currentStep === 3) {
+      setTimeout(() => actions.setCurrentStep(3), 100);
+    } else if (state.currentStep === 3) {
       // Save skills to database
-      await saveProgress({ question_3_skills: answers.skillsConfidence });
+      await saveProgress({ question_3_skills: state.state.answers.skillsConfidence });
       
-      setTimeout(() => setCurrentStep(4), 100);
-    } else if (currentStep === 4) {
-      if (answers.careerValues.length === 0) return;
+      setTimeout(() => actions.setCurrentStep(4), 100);
+    } else if (state.currentStep === 4) {
+      if (state.state.answers.careerValues.length === 0) return;
       
       // Save career values to database
-      await saveProgress({ question_4_values: answers.careerValues });
+      await saveProgress({ question_4_values: state.state.answers.careerValues });
       
-      setTimeout(() => setCurrentStep(5), 100);
-    } else if (currentStep === 5) {
-      if (answers.academicStrengths.length === 0) return;
+      setTimeout(() => actions.setCurrentStep(5), 100);
+    } else if (state.currentStep === 5) {
+      if (state.state.answers.academicStrengths.length === 0) return;
       
       // Questionnaire complete, save final answer and generate recommendations
-      setIsLoading(true);
+      actions.setLoading(true);
       try {
         // Check if user is authenticated
         const { data: { user } } = await supabase.auth.getUser();
@@ -298,31 +234,36 @@ const QuestionnairePage = () => {
         }
 
         const finalAnswers = {
-          ...answers,
-          interests: selectedSubjects,
-          academicStrengths: answers.academicStrengths
+          ...state.answers,
+          interests: state.selectedSubjects,
+          academicStrengths: state.state.answers.academicStrengths
         };
 
         // Save final answer and mark as completed
+        console.log('Updating questionnaire response:', state.responseId, state.state.answers.academicStrengths);
         const { error: updateError } = await supabase
           .from('questionnaire_responses')
           .update({
-            question_5_academic_strengths: answers.academicStrengths,
+            question_5_academic_strengths: state.state.answers.academicStrengths,
             is_completed: true,
             completed_at: new Date().toISOString()
           })
-          .eq('id', responseId);
+          .eq('id', state.responseId);
 
         if (updateError) {
+          console.error('Database Update Error:', updateError);
           throw new Error(updateError.message);
         }
 
         // Generate AI recommendations
+        console.log('Sending answers to AI:', finalAnswers);
         const response = await supabase.functions.invoke('generate-recommendations', {
           body: { answers: finalAnswers }
         });
 
+        console.log('AI Response:', response);
         if (response.error) {
+          console.error('AI Generation Error:', response.error);
           throw new Error(response.error.message);
         }
 
@@ -331,7 +272,7 @@ const QuestionnairePage = () => {
           .from('recommendations')
           .insert({
             user_id: user.id,
-            questionnaire_response_id: responseId,
+            questionnaire_response_id: state.responseId,
             recommendations: response.data
           });
 
@@ -345,48 +286,79 @@ const QuestionnairePage = () => {
           state: { 
             recommendations: response.data,
             answers: finalAnswers,
-            responseId: responseId
+            responseId: state.responseId
           } 
         });
       } catch (error) {
         console.error('Error generating recommendations:', error);
-        toast({
-          title: "Error",
-          description: "Failed to generate recommendations. Please try again.",
-          variant: "destructive",
+        
+        // Fallback recommendations when AI service fails
+        const fallbackRecommendations = {
+          recommendations: [
+            {
+              major: "Computer Science",
+              confidence: 85,
+              reasoning: "Based on your responses, you show strong analytical thinking and interest in technology. Computer Science offers diverse career opportunities in software development, AI, and tech innovation.",
+              career_paths: ["Software Developer", "Data Scientist", "Product Manager", "Tech Entrepreneur"],
+              why_good_fit: "Your technical aptitude and problem-solving skills align well with this field",
+              considerations: "Requires continuous learning as technology evolves rapidly"
+            },
+            {
+              major: "Business Administration",
+              confidence: 78,
+              reasoning: "Your leadership qualities and strategic thinking make you well-suited for business roles. This major provides versatility across industries.",
+              career_paths: ["Management Consultant", "Marketing Manager", "Operations Director", "Business Analyst"],
+              why_good_fit: "Your communication skills and goal-oriented approach match business environments",
+              considerations: "Consider specializing in an area that matches your specific interests"
+            },
+            {
+              major: "Psychology",
+              confidence: 72,
+              reasoning: "Your interest in understanding people and helping others indicates a strong fit for psychology and human-centered fields.",
+              career_paths: ["Clinical Psychologist", "HR Specialist", "UX Researcher", "Counselor"],
+              why_good_fit: "Your empathy and analytical skills are valuable in understanding human behavior",
+              considerations: "May require additional graduate education for certain career paths"
+            }
+          ],
+          summary: "We encountered an issue with our AI service, so we've provided general recommendations based on common career paths. For personalized results, please try again or consult with an academic advisor."
+        };
+
+        // Navigate to results with fallback data
+        navigate('/results', { 
+          state: { 
+            recommendations: fallbackRecommendations,
+            answers: finalAnswers,
+            responseId: state.responseId
+          } 
         });
-        setIsLoading(false);
+        
+        toast({
+          title: "Using Backup Recommendations",
+          description: "We provided general recommendations. Try again later for personalized results.",
+          variant: "default",
+        });
       }
     }
   };
 
   const handleBack = () => {
-    if (currentStep === 5) {
-      setCurrentStep(4);
-    } else if (currentStep === 4) {
-      setCurrentStep(3);
-    } else if (currentStep === 3) {
-      setCurrentStep(2);
-    } else if (currentStep === 2) {
-      setCurrentStep(1);
-    } else if (currentStep === 1) {
+    if (state.currentStep === 5) {
+      actions.setCurrentStep(4);
+    } else if (state.currentStep === 4) {
+      actions.setCurrentStep(3);
+    } else if (state.currentStep === 3) {
+      actions.setCurrentStep(2);
+    } else if (state.currentStep === 2) {
+      actions.setCurrentStep(1);
+    } else if (state.currentStep === 1) {
       navigate("/auth");
     }
   };
 
-  const canProceed = () => {
-    if (currentStep === 1) return selectedSubjects.length > 0;
-    if (currentStep === 2) return answers.workStyle !== "";
-    if (currentStep === 3) return true; // Skills have default values, always can proceed
-    if (currentStep === 4) return answers.careerValues.length > 0;
-    if (currentStep === 5) return answers.academicStrengths.length > 0;
-    return false;
-  };
-
-  const progressPercentage = (currentStep / totalSteps) * 100;
+  const progressPercentage = (state.currentStep / totalSteps) * 100;
 
   // Show loading state while checking for existing progress
-  if (isResumingProgress) {
+  if (state.isResumingProgress) {
     return (
       <div className="min-h-screen gradient-warm flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -398,479 +370,311 @@ const QuestionnairePage = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Subtle Background Pattern */}
-      <div className="absolute inset-0 gradient-warm"></div>
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-5 sm:left-10 w-24 h-24 sm:w-32 sm:h-32 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-32 sm:top-40 right-10 sm:right-20 w-36 h-36 sm:w-48 sm:h-48 bg-orange-accent/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-32 sm:bottom-40 left-1/4 w-30 h-30 sm:w-40 sm:h-40 bg-purple-accent/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-16 sm:bottom-20 right-1/3 w-28 h-28 sm:w-36 sm:h-36 bg-success/10 rounded-full blur-3xl"></div>
-      </div>
-      
-      <div className="relative z-10 py-6 sm:py-8 px-4 sm:px-6">
-      <div className="container mx-auto max-w-3xl">
-        {/* Header with back button - Mobile Optimized */}
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto max-w-4xl py-8 px-8">
+        {/* Header - Minimal */}
+        <div className="flex items-center justify-between mb-16">
           <Button
             variant="ghost"
             onClick={handleBack}
-            className="text-muted-foreground hover:text-foreground rounded-xl px-3 sm:px-4 py-3 min-h-[44px] touch-manipulation"
+            className="text-muted-foreground hover:text-foreground font-normal"
           >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">Back</span>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
           </Button>
           
-          <div className="text-sm sm:text-lg font-medium text-muted-foreground">
-            Question {currentStep} of {totalSteps}
+          <div className="text-sm font-normal text-muted-foreground">
+            {state.currentStep} of {totalSteps}
           </div>
         </div>
 
-        {/* Progress Bar - Mobile Optimized */}
-        <div className="mb-12 sm:mb-16">
-          {/* Progress Header */}
-          <div className="text-center mb-6 sm:mb-8">
-            <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Your Progress</h3>
-            <p className="text-sm sm:text-lg text-muted-foreground">
-              Step {currentStep} of {totalSteps} • {Math.round(progressPercentage)}% Complete
-            </p>
-          </div>
-          
-          {/* Visual Progress Steps - Mobile Optimized */}
-          <div className="relative max-w-2xl mx-auto">
-            {/* Progress Line Background */}
-            <div className="absolute top-6 sm:top-8 left-0 right-0 h-0.5 sm:h-1 bg-border rounded-full mx-6 sm:mx-8"></div>
-            
-            {/* Animated Progress Line */}
+        {/* Progress - Minimal */}
+        <div className="mb-20">
+          <div className="w-full bg-border h-px mb-8">
             <div 
-              className="absolute top-6 sm:top-8 left-0 h-0.5 sm:h-1 bg-gradient-to-r from-primary to-purple-accent rounded-full mx-6 sm:mx-8 transition-all duration-700 ease-out animate-progress-fill"
-              style={{ 
-                width: `calc(${progressPercentage}% - 48px)`,
-                '--progress-width': `${progressPercentage}%`
-              } as React.CSSProperties}
-            ></div>
-            
-            {/* Step Circles - Mobile Optimized */}
-            <div className="flex justify-between relative z-10">
-              {Array.from({ length: totalSteps }, (_, index) => {
-                const stepNumber = index + 1;
-                const isCompleted = stepNumber < currentStep;
-                const isCurrent = stepNumber === currentStep;
-                const isUpcoming = stepNumber > currentStep;
-                
-                return (
-                  <div
-                    key={stepNumber}
-                    className={`relative flex flex-col items-center transition-all duration-500 ${
-                      isCurrent ? 'scale-110' : ''
-                    }`}
-                  >
-                    {/* Step Circle - Mobile Optimized */}
-                    <div
-                      className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center font-bold text-sm sm:text-lg border-2 sm:border-4 transition-all duration-500 ${
-                        isCompleted
-                          ? 'bg-success text-success-foreground border-success shadow-lg'
-                          : isCurrent
-                          ? 'bg-primary text-primary-foreground border-primary shadow-large animate-pulse'
-                          : 'bg-background text-muted-foreground border-border'
-                      }`}
-                    >
-                      {isCompleted ? (
-                        <svg className="w-5 h-5 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      ) : (
-                        stepNumber
-                      )}
-                    </div>
-                    
-                    {/* Step Label - Mobile Optimized */}
-                    <div className={`mt-2 sm:mt-3 text-center transition-all duration-300 ${
-                      isCurrent ? 'text-primary font-semibold' : 'text-muted-foreground'
-                    }`}>
-                      <div className="text-xs sm:text-sm font-medium">
-                        {stepNumber === 1 && 'Interests'}
-                        {stepNumber === 2 && 'Work Style'}
-                        {stepNumber === 3 && 'Skills'}
-                        {stepNumber === 4 && 'Values'}
-                        {stepNumber === 5 && 'Strengths'}
-                      </div>
-                    </div>
-                    
-                    {/* Completion Sparkle Effect - Mobile Optimized */}
-                    {isCompleted && (
-                      <div className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 w-4 h-4 sm:w-6 sm:h-6 animate-bounce">
-                        <div className="w-full h-full bg-orange-accent rounded-full flex items-center justify-center">
-                          <svg className="w-2 h-2 sm:w-3 sm:h-3 text-orange-accent-foreground" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          
-          {/* Encouraging Message - Mobile Optimized */}
-          <div className="text-center mt-6 sm:mt-8">
-            {currentStep === 1 && (
-              <p className="text-sm sm:text-base text-muted-foreground">🚀 Let's discover your interests!</p>
-            )}
-            {currentStep === 2 && (
-              <p className="text-sm sm:text-base text-muted-foreground">💪 Great start! Now about your work style...</p>
-            )}
-            {currentStep === 3 && (
-              <p className="text-sm sm:text-base text-muted-foreground">⭐ Awesome! Let's explore your skills...</p>
-            )}
-            {currentStep === 4 && (
-              <p className="text-sm sm:text-base text-muted-foreground">🎯 Amazing progress! What drives you?</p>
-            )}
-            {currentStep === 5 && (
-              <p className="text-sm sm:text-base text-muted-foreground">🏆 Almost there! Your academic strengths...</p>
-            )}
+              className="h-px bg-foreground transition-all duration-700 ease-out"
+              style={{ width: `${progressPercentage}%` }}
+            />
           </div>
         </div>
 
-        {/* Question Card - Mobile Optimized */}
-        <Card className="border-primary/10 shadow-large mb-6 sm:mb-8 rounded-3xl bg-white/90 backdrop-blur-sm">
-          {currentStep === 1 && (
+        {/* Question Section - Minimal */}
+        <div className="mb-16">
+          {state.currentStep === 1 && (
             <>
-              <CardHeader className="pb-8 sm:pb-12 px-4 sm:px-6">
-                <CardTitle className="text-2xl sm:text-3xl md:text-4xl text-center font-bold mb-4 sm:mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
                   What subjects excite you most?
-                </CardTitle>
-                <p className="text-center text-muted-foreground text-base sm:text-xl leading-relaxed max-w-2xl mx-auto px-2">
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
                   Select all that apply. Choose the subjects that genuinely interest and energize you.
                 </p>
-              </CardHeader>
+              </div>
               
-              <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-8 pb-6 sm:pb-8">
+              <div className="space-y-3 max-w-2xl mx-auto">
                 {subjectOptions.map((option) => (
                   <div
                     key={option.id}
                     data-subject={option.id}
-                    className={`group flex items-start space-x-3 sm:space-x-5 p-4 sm:p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.01] sm:hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large min-h-[80px] touch-manipulation ${
-                      selectedSubjects.includes(option.id)
-                        ? "border-primary bg-primary/10 shadow-medium scale-[1.01] animate-scale-in"
-                        : "border-border hover:border-primary/30"
+                    className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                      state.selectedSubjects.includes(option.id)
+                        ? "border-foreground bg-muted/30"
+                        : "border-border hover:border-muted-foreground"
                     }`}
                     onClick={() => handleSubjectToggle(option.id)}
                   >
-                    {/* Icon - Mobile Optimized */}
-                    <div className={`p-2 sm:p-3 rounded-xl transition-all duration-300 ${
-                      selectedSubjects.includes(option.id)
-                        ? "bg-primary text-primary-foreground shadow-soft"
-                        : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
-                    }`}>
-                      <option.icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                    </div>
                     <Checkbox
                       id={option.id}
-                      checked={selectedSubjects.includes(option.id)}
+                      checked={state.selectedSubjects.includes(option.id)}
                       onCheckedChange={() => handleSubjectToggle(option.id)}
-                      className="mt-1 min-w-[20px] min-h-[20px]"
+                      className="w-5 h-5"
                     />
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-lg sm:text-xl mb-1 sm:mb-2 block"
+                        className="font-normal leading-none cursor-pointer text-lg block mb-1"
                       >
                         {option.label}
                       </label>
-                      <p className="text-muted-foreground leading-relaxed text-sm sm:text-lg">
+                      <p className="text-muted-foreground leading-relaxed text-sm">
                         {option.description}
                       </p>
                     </div>
                   </div>
                 ))}
-              </CardContent>
+              </div>
             </>
           )}
 
-          {currentStep === 2 && (
+          {state.currentStep === 2 && (
             <>
-              <CardHeader className="pb-12">
-                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
                   How do you prefer to work?
-                </CardTitle>
-                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
                   Select the working style that best describes your preference.
                 </p>
-              </CardHeader>
+              </div>
               
-              <CardContent className="space-y-6 px-8 pb-8">
+              <div className="max-w-2xl mx-auto">
                 <RadioGroup 
-                  value={answers.workStyle} 
+                  value={state.answers.workStyle} 
                   onValueChange={handleWorkStyleChange}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
                   {workStyleOptions.map((option) => (
                     <div
                       key={option.id}
-                      className={`group flex items-start space-x-5 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large ${
-                        answers.workStyle === option.id
-                          ? "border-primary bg-primary/10 shadow-medium scale-[1.01]"
-                          : "border-border hover:border-primary/30"
+                      className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                        state.answers.workStyle === option.id
+                          ? "border-foreground bg-muted/30"
+                          : "border-border hover:border-muted-foreground"
                       }`}
                       onClick={() => handleWorkStyleChange(option.id)}
                     >
-                      {/* Icon */}
-                      <div className={`p-3 rounded-xl transition-all duration-300 ${
-                        answers.workStyle === option.id
-                          ? "bg-primary text-primary-foreground shadow-soft"
-                          : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
-                      }`}>
-                        <option.icon className="w-6 h-6" />
-                      </div>
                       <RadioGroupItem
                         value={option.id}
                         id={option.id}
-                        className="mt-1"
+                        className="w-5 h-5"
                       />
                       <div className="flex-1">
                         <Label
                           htmlFor={option.id}
-                          className="font-medium leading-none cursor-pointer text-lg"
+                          className="font-normal leading-none cursor-pointer text-lg block mb-1"
                         >
                           {option.label}
                         </Label>
-                        <p className="text-muted-foreground mt-2 leading-relaxed">
+                        <p className="text-muted-foreground leading-relaxed text-sm">
                           {option.description}
                         </p>
                       </div>
                     </div>
                   ))}
                 </RadioGroup>
-              </CardContent>
+              </div>
             </>
           )}
 
-          {currentStep === 3 && (
+          {state.currentStep === 3 && (
             <>
-              <CardHeader className="pb-12">
-                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
                   Rate your confidence in these areas
-                </CardTitle>
-                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
                   Use the scale from 1 (low confidence) to 5 (high confidence) to rate yourself.
                 </p>
-              </CardHeader>
+              </div>
               
-              <CardContent className="space-y-8 px-8 pb-8">
+              <div className="space-y-8 max-w-3xl mx-auto">
                 {skillsOptions.map((skill) => (
-                  <div key={skill.id} className="space-y-4 p-6 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-all duration-300">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center space-x-4">
-                        <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                          <skill.icon className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <Label className="text-xl font-bold">{skill.label}</Label>
-                          <p className="text-muted-foreground mt-1 leading-relaxed text-lg">{skill.description}</p>
-                        </div>
+                  <div key={skill.id} className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <Label className="text-lg font-normal text-foreground">{skill.label}</Label>
+                        <p className="text-muted-foreground mt-1 leading-relaxed text-sm">{skill.description}</p>
                       </div>
-                      <div className="text-2xl font-bold text-primary min-w-16 text-center bg-primary/10 rounded-2xl px-4 py-2 shadow-soft">
-                        {answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence][0]}
+                      <div className="text-lg font-normal text-foreground min-w-8 text-center">
+                        {state.answers.skillsConfidence[skill.id as keyof typeof state.answers.skillsConfidence][0]}
                       </div>
                     </div>
                     <Slider
-                      value={answers.skillsConfidence[skill.id as keyof typeof answers.skillsConfidence]}
+                      value={state.answers.skillsConfidence[skill.id as keyof typeof state.answers.skillsConfidence]}
                       onValueChange={(value) => handleSkillConfidenceChange(skill.id, value)}
                       max={5}
                       min={1}
                       step={1}
                       className="w-full"
                     />
-                    <div className="flex justify-between text-sm text-muted-foreground font-medium">
-                      <span>1 - Low</span>
-                      <span>3 - Average</span>
-                      <span>5 - High</span>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Low</span>
+                      <span>Average</span>
+                      <span>High</span>
                     </div>
                   </div>
                 ))}
-              </CardContent>
+              </div>
             </>
           )}
 
-          {currentStep === 4 && (
+          {state.currentStep === 4 && (
             <>
-              <CardHeader className="pb-12">
-                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
                   What's most important to you in a career?
-                </CardTitle>
-                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
                   Select up to 2 values that matter most to you in your future career.
                 </p>
-              </CardHeader>
+              </div>
               
-              <CardContent className="space-y-6 px-8 pb-8">
+              <div className="space-y-3 max-w-2xl mx-auto">
                 {careerValuesOptions.map((option) => (
                   <div
                     key={option.id}
-                    className={`group flex items-start space-x-5 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large ${
-                      answers.careerValues.includes(option.id)
-                        ? "border-primary bg-primary/10 shadow-medium scale-[1.01]"
-                        : "border-border hover:border-primary/30"
+                    className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                      state.answers.careerValues.includes(option.id)
+                        ? "border-foreground bg-muted/30"
+                        : "border-border hover:border-muted-foreground"
                     } ${
-                      !answers.careerValues.includes(option.id) && answers.careerValues.length >= 2
-                        ? "opacity-50 cursor-not-allowed hover:scale-100"
+                      !state.answers.careerValues.includes(option.id) && state.answers.careerValues.length >= 2
+                        ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}
                     onClick={() => {
-                      if (answers.careerValues.includes(option.id) || answers.careerValues.length < 2) {
+                      if (state.answers.careerValues.includes(option.id) || state.answers.careerValues.length < 2) {
                         handleCareerValueToggle(option.id);
                       }
                     }}
                   >
-                    {/* Icon */}
-                    <div className={`p-3 rounded-xl transition-all duration-300 ${
-                      answers.careerValues.includes(option.id)
-                        ? "bg-primary text-primary-foreground shadow-soft"
-                        : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
-                    }`}>
-                      <option.icon className="w-6 h-6" />
-                    </div>
                     <Checkbox
                       id={option.id}
-                      checked={answers.careerValues.includes(option.id)}
+                      checked={state.answers.careerValues.includes(option.id)}
                       onCheckedChange={() => {
-                        if (answers.careerValues.includes(option.id) || answers.careerValues.length < 2) {
+                        if (state.answers.careerValues.includes(option.id) || state.answers.careerValues.length < 2) {
                           handleCareerValueToggle(option.id);
                         }
                       }}
-                      className="mt-1"
-                      disabled={!answers.careerValues.includes(option.id) && answers.careerValues.length >= 2}
+                      className="w-5 h-5"
+                      disabled={!state.answers.careerValues.includes(option.id) && state.answers.careerValues.length >= 2}
                     />
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-xl mb-2 block"
+                        className="font-normal leading-none cursor-pointer text-lg block mb-1"
                       >
                         {option.label}
                       </label>
-                      <p className="text-muted-foreground leading-relaxed text-lg">
+                      <p className="text-muted-foreground leading-relaxed text-sm">
                         {option.description}
                       </p>
                     </div>
                   </div>
                 ))}
-              </CardContent>
+              </div>
             </>
           )}
 
-          {currentStep === 5 && (
+          {state.currentStep === 5 && (
             <>
-              <CardHeader className="pb-12">
-                <CardTitle className="text-3xl md:text-4xl text-center font-bold mb-6 bg-gradient-to-r from-primary to-purple-accent bg-clip-text text-transparent">
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
                   Which academic subjects are you strongest in?
-                </CardTitle>
-                <p className="text-center text-muted-foreground text-xl leading-relaxed max-w-2xl mx-auto">
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
                   Select all subjects where you excel or have demonstrated strong performance.
                 </p>
-              </CardHeader>
+              </div>
               
-              <CardContent className="space-y-6 px-8 pb-8">
+              <div className="space-y-3 max-w-2xl mx-auto">
                 {academicStrengthsOptions.map((option) => (
                   <div
                     key={option.id}
-                    className={`group flex items-start space-x-5 p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:border-primary/60 hover:bg-primary/5 hover:shadow-large ${
-                      answers.academicStrengths.includes(option.id)
-                        ? "border-primary bg-primary/10 shadow-medium scale-[1.01]"
-                        : "border-border hover:border-primary/30"
+                    className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                      state.answers.academicStrengths.includes(option.id)
+                        ? "border-foreground bg-muted/30"
+                        : "border-border hover:border-muted-foreground"
                     }`}
                     onClick={() => handleAcademicStrengthToggle(option.id)}
                   >
-                    {/* Icon */}
-                    <div className={`p-3 rounded-xl transition-all duration-300 ${
-                      answers.academicStrengths.includes(option.id)
-                        ? "bg-primary text-primary-foreground shadow-soft"
-                        : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
-                    }`}>
-                      <option.icon className="w-6 h-6" />
-                    </div>
                     <Checkbox
                       id={option.id}
-                      checked={answers.academicStrengths.includes(option.id)}
+                      checked={state.answers.academicStrengths.includes(option.id)}
                       onCheckedChange={() => handleAcademicStrengthToggle(option.id)}
-                      className="mt-1"
+                      className="w-5 h-5"
                     />
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-lg"
+                        className="font-normal leading-none cursor-pointer text-lg block mb-1"
                       >
                         {option.label}
                       </label>
-                      <p className="text-muted-foreground mt-2 leading-relaxed">
+                      <p className="text-muted-foreground leading-relaxed text-sm">
                         {option.description}
                       </p>
                     </div>
                   </div>
                 ))}
-              </CardContent>
+              </div>
             </>
           )}
-        </Card>
+        </div>
 
         {/* Navigation */}
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-muted-foreground">
-            {currentStep === 1 && selectedSubjects.length > 0 && (
-              <span>{selectedSubjects.length} subject{selectedSubjects.length !== 1 ? "s" : ""} selected</span>
-            )}
-            {currentStep === 2 && answers.workStyle && (
-              <span>Work style selected</span>
-            )}
-            {currentStep === 3 && (
-              <span>Confidence levels set</span>
-            )}
-            {currentStep === 4 && (
-              <span>Selected: {answers.careerValues.length}/2</span>
-            )}
-            {currentStep === 5 && answers.academicStrengths.length > 0 && (
-              <span>{answers.academicStrengths.length} strength{answers.academicStrengths.length !== 1 ? "s" : ""} selected</span>
-            )}
-          </div>
-          
-          <div className="flex gap-6 justify-center">
-            {currentStep > 1 && (
-              <Button
-                variant="outline"
-                onClick={handleBack}
-                className="border-2 border-primary/30 text-primary hover:bg-primary/10 rounded-2xl px-10 py-6 text-xl font-bold hover:scale-105 transition-all duration-300 hover:shadow-medium"
-              >
-                <ArrowLeft className="w-6 h-6 mr-3" />
-                Back
-              </Button>
-            )}
-            
+        <div className="flex justify-center items-center gap-4 mt-20">
+          {state.currentStep > 1 && (
             <Button
-              onClick={handleNext}
-              disabled={!canProceed() || isLoading}
-              className="gradient-primary text-white rounded-2xl px-12 py-6 text-xl font-bold shadow-large hover:shadow-xl hover:scale-105 transition-all duration-300 border-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              variant="outline"
+              onClick={handleBack}
+              className="border border-border text-foreground hover:bg-muted px-6 py-3 text-base font-normal rounded-lg transition-all duration-200"
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-6 h-6 mr-3 animate-spin" />
-                  Generating Your Results...
-                </>
-              ) : currentStep === 5 ? (
-                <>
-                  <Trophy className="w-6 h-6 mr-3" />
-                  Finish Quiz
-                </>
-              ) : (
-                <>
-                  Next Step
-                  <ArrowRight className="w-6 h-6 ml-3" />
-                </>
-              )}
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
             </Button>
-          </div>
+          )}
+          
+          <Button
+            onClick={handleNext}
+            disabled={!canProceed || state.isLoading}
+            className="bg-primary text-primary-foreground px-8 py-3 text-base font-normal rounded-lg transition-all duration-200 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {state.isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Generating results...
+              </>
+            ) : state.currentStep === 5 ? (
+              "Complete"
+            ) : (
+              <>
+                Continue
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </>
+            )}
+          </Button>
         </div>
-      </div>
       </div>
     </div>
   );
