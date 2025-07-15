@@ -21,55 +21,112 @@ const QuestionnairePage = () => {
 
   // Check if user is authenticated and load any existing progress
   useEffect(() => {
+    // Prevent infinite loops with a flag
+    let isEffectActive = true;
+    
     const checkAuthAndLoadProgress = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/auth');
-        return;
-      }
-
-      // Check for existing incomplete response
-      const { data: existingResponse } = await supabase
-        .from('questionnaire_responses')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_completed', false)
-        .maybeSingle();
-
-      if (existingResponse) {
-        // Resume existing progress
-        actions.setResponseId(existingResponse.id);
-        loadProgressFromResponse(existingResponse);
-        toast({
-          title: "Resuming your progress",
-          description: "We found your previous questionnaire progress!",
-        });
-      } else {
-        // Create new response
-        const { data: newResponse, error } = await supabase
-          .from('questionnaire_responses')
-          .insert({ user_id: user.id })
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Error creating response:', error);
-          toast({
-            title: "Error",
-            description: "Failed to start questionnaire. Please try again.",
-            variant: "destructive",
-          });
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          navigate('/auth');
           return;
         }
 
-        actions.setResponseId(newResponse.id);
+        // Check for existing incomplete response
+        const { data: existingResponse, error: queryError } = await supabase
+          .from('questionnaire_responses')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_completed', false)
+          .maybeSingle();
+
+        if (queryError) {
+          // If there's a query error, start fresh
+          actions.setResumingProgress(false);
+          return;
+        }
+
+        if (existingResponse && isEffectActive) {
+          // Check if the response has valid data structure
+          const hasValidData = existingResponse.question_1_interests || 
+                              existingResponse.question_2_work_style || 
+                              existingResponse.question_3_skills || 
+                              existingResponse.question_4_values || 
+                              existingResponse.question_5_academic_strengths;
+          
+          if (hasValidData) {
+            // Resume existing progress
+            actions.setResponseId(existingResponse.id);
+            loadProgressFromResponse(existingResponse);
+            toast({
+              title: "Resuming your progress",
+              description: "We found your previous questionnaire progress!",
+            });
+          } else {
+            // Delete the empty response and create a new one
+            await supabase
+              .from('questionnaire_responses')
+              .delete()
+              .eq('id', existingResponse.id);
+            
+            const { data: newResponse, error } = await supabase
+              .from('questionnaire_responses')
+              .insert({ user_id: user.id })
+              .select()
+              .single();
+
+            if (!error && isEffectActive) {
+              actions.setResponseId(newResponse.id);
+            }
+          }
+        } else {
+          // Create new response
+          const { data: newResponse, error } = await supabase
+            .from('questionnaire_responses')
+            .insert({ user_id: user.id })
+            .select()
+            .single();
+
+          if (error) {
+            toast({
+              title: "Error",
+              description: "Failed to start questionnaire. Please try again.",
+              variant: "destructive",
+            });
+            actions.setResumingProgress(false);
+            return;
+          }
+
+          if (isEffectActive) {
+            actions.setResponseId(newResponse.id);
+          }
+        }
+        
+        if (isEffectActive) {
+          actions.setResumingProgress(false);
+        }
+      } catch (error) {
+        if (isEffectActive) {
+          actions.setResumingProgress(false);
+          toast({
+            title: "Error",
+            description: "Failed to load questionnaire. Please refresh and try again.",
+            variant: "destructive",
+          });
+        }
       }
-      
-      actions.setResumingProgress(false);
     };
     
-    checkAuthAndLoadProgress();
-  }, [navigate, toast, actions]);
+    // Only run if we're still in resuming state
+    if (state.isResumingProgress) {
+      checkAuthAndLoadProgress();
+    }
+    
+    // Cleanup function to prevent state updates if component unmounts
+    return () => {
+      isEffectActive = false;
+    };
+  }, [state.isResumingProgress]); // Only depend on isResumingProgress to prevent loops
   
   
   const subjectOptions = [
@@ -189,9 +246,6 @@ const QuestionnairePage = () => {
     actions.setSkillConfidence(skillId, value);
   };
 
-  const handleAcademicStrengthToggle = (strengthId: string) => {
-    actions.toggleAcademicStrength(strengthId);
-  };
 
   const handleNext = async () => {
     if (state.currentStep === 1) {
@@ -202,29 +256,37 @@ const QuestionnairePage = () => {
       
       setTimeout(() => actions.setCurrentStep(2), 100);
     } else if (state.currentStep === 2) {
-      if (!state.state.answers.workStyle) return;
+      if (!state.answers.workStyle) return;
       
       // Save work style to database
-      await saveProgress({ question_2_work_style: state.state.answers.workStyle });
+      await saveProgress({ question_2_work_style: state.answers.workStyle });
       
       setTimeout(() => actions.setCurrentStep(3), 100);
     } else if (state.currentStep === 3) {
       // Save skills to database
-      await saveProgress({ question_3_skills: state.state.answers.skillsConfidence });
+      await saveProgress({ question_3_skills: state.answers.skillsConfidence });
       
       setTimeout(() => actions.setCurrentStep(4), 100);
     } else if (state.currentStep === 4) {
-      if (state.state.answers.careerValues.length === 0) return;
+      if (state.answers.careerValues.length === 0) return;
       
       // Save career values to database
-      await saveProgress({ question_4_values: state.state.answers.careerValues });
+      await saveProgress({ question_4_values: state.answers.careerValues });
       
       setTimeout(() => actions.setCurrentStep(5), 100);
     } else if (state.currentStep === 5) {
-      if (state.state.answers.academicStrengths.length === 0) return;
+      if (state.answers.academicStrengths.length === 0) return;
       
       // Questionnaire complete, save final answer and generate recommendations
       actions.setLoading(true);
+      
+      // Prepare final answers outside try block so it's accessible in catch
+      const finalAnswers = {
+        ...state.answers,
+        interests: state.selectedSubjects,
+        academicStrengths: state.answers.academicStrengths
+      };
+      
       try {
         // Check if user is authenticated
         const { data: { user } } = await supabase.auth.getUser();
@@ -233,38 +295,38 @@ const QuestionnairePage = () => {
           return;
         }
 
-        const finalAnswers = {
-          ...state.answers,
-          interests: state.selectedSubjects,
-          academicStrengths: state.state.answers.academicStrengths
-        };
-
         // Save final answer and mark as completed
-        console.log('Updating questionnaire response:', state.responseId, state.state.answers.academicStrengths);
+        
         const { error: updateError } = await supabase
           .from('questionnaire_responses')
           .update({
-            question_5_academic_strengths: state.state.answers.academicStrengths,
+            question_5_academic_strengths: state.answers.academicStrengths,
             is_completed: true,
             completed_at: new Date().toISOString()
           })
           .eq('id', state.responseId);
 
         if (updateError) {
-          console.error('Database Update Error:', updateError);
           throw new Error(updateError.message);
         }
 
         // Generate AI recommendations
-        console.log('Sending answers to AI:', finalAnswers);
-        const response = await supabase.functions.invoke('generate-recommendations', {
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('AI service timeout after 60 seconds')), 60000);
+        });
+        
+        const aiPromise = supabase.functions.invoke('generate-recommendations', {
           body: { answers: finalAnswers }
         });
+        
+        const response = await Promise.race([aiPromise, timeoutPromise]);
 
-        console.log('AI Response:', response);
         if (response.error) {
-          console.error('AI Generation Error:', response.error);
-          throw new Error(response.error.message);
+          throw new Error(`AI Service Error: ${response.error.message || 'Unknown error'}`);
+        }
+        
+        if (!response.data) {
+          throw new Error('AI service returned empty response');
         }
 
         // Save recommendations to database
@@ -277,8 +339,8 @@ const QuestionnairePage = () => {
           });
 
         if (recommendationError) {
-          console.error('Error saving recommendations:', recommendationError);
           // Don't fail the whole flow if saving recommendations fails
+          console.error('Error saving recommendations:', recommendationError);
         }
 
         // Navigate to results with the recommendations
@@ -290,7 +352,28 @@ const QuestionnairePage = () => {
           } 
         });
       } catch (error) {
-        console.error('Error generating recommendations:', error);
+        // Check if it's a specific AI service error
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        
+        if (errorMessage.includes('timeout')) {
+          toast({
+            title: "Request Timeout",
+            description: "AI service is taking too long. Using backup recommendations.",
+            variant: "default",
+          });
+        } else if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+          toast({
+            title: "Service Unavailable", 
+            description: "AI service not deployed. Using backup recommendations.",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "AI Service Error",
+            description: `${errorMessage}. Using backup recommendations.`,
+            variant: "default",
+          });
+        }
         
         // Fallback recommendations when AI service fails
         const fallbackRecommendations = {
@@ -564,7 +647,7 @@ const QuestionnairePage = () => {
                     }`}
                     onClick={() => {
                       if (state.answers.careerValues.includes(option.id) || state.answers.careerValues.length < 2) {
-                        handleCareerValueToggle(option.id);
+                        actions.toggleCareerValue(option.id);
                       }
                     }}
                   >
@@ -573,7 +656,7 @@ const QuestionnairePage = () => {
                       checked={state.answers.careerValues.includes(option.id)}
                       onCheckedChange={() => {
                         if (state.answers.careerValues.includes(option.id) || state.answers.careerValues.length < 2) {
-                          handleCareerValueToggle(option.id);
+                          actions.toggleCareerValue(option.id);
                         }
                       }}
                       className="w-5 h-5"
@@ -616,12 +699,12 @@ const QuestionnairePage = () => {
                         ? "border-foreground bg-muted/30"
                         : "border-border hover:border-muted-foreground"
                     }`}
-                    onClick={() => handleAcademicStrengthToggle(option.id)}
+                    onClick={() => actions.toggleAcademicStrength(option.id)}
                   >
                     <Checkbox
                       id={option.id}
                       checked={state.answers.academicStrengths.includes(option.id)}
-                      onCheckedChange={() => handleAcademicStrengthToggle(option.id)}
+                      onCheckedChange={() => actions.toggleAcademicStrength(option.id)}
                       className="w-5 h-5"
                     />
                     <div className="flex-1">
@@ -657,7 +740,7 @@ const QuestionnairePage = () => {
           
           <Button
             onClick={handleNext}
-            disabled={!canProceed || state.isLoading}
+            disabled={!canProceed() || state.isLoading}
             className="bg-primary text-primary-foreground px-8 py-3 text-base font-normal rounded-lg transition-all duration-200 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {state.isLoading ? (

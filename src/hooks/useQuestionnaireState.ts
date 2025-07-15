@@ -110,7 +110,7 @@ function questionnaireReducer(state: QuestionnaireState, action: QuestionnaireAc
     case 'SET_RESUMING_PROGRESS':
       return { ...state, isResumingProgress: action.payload };
     
-    case 'LOAD_PROGRESS':
+    case 'LOAD_PROGRESS': {
       const { step, ...answers } = action.payload;
       return {
         ...state,
@@ -118,8 +118,9 @@ function questionnaireReducer(state: QuestionnaireState, action: QuestionnaireAc
         answers: { ...state.answers, ...answers },
         selectedSubjects: answers.interests || state.selectedSubjects
       };
+    }
     
-    case 'TOGGLE_SUBJECT':
+    case 'TOGGLE_SUBJECT': {
       const subjectId = action.payload;
       const newSelectedSubjects = state.selectedSubjects.includes(subjectId)
         ? state.selectedSubjects.filter(id => id !== subjectId)
@@ -130,8 +131,9 @@ function questionnaireReducer(state: QuestionnaireState, action: QuestionnaireAc
         selectedSubjects: newSelectedSubjects,
         answers: { ...state.answers, interests: newSelectedSubjects }
       };
+    }
     
-    case 'TOGGLE_CAREER_VALUE':
+    case 'TOGGLE_CAREER_VALUE': {
       const valueId = action.payload;
       const currentValues = state.answers.careerValues;
       let newCareerValues: string[];
@@ -148,8 +150,9 @@ function questionnaireReducer(state: QuestionnaireState, action: QuestionnaireAc
         ...state,
         answers: { ...state.answers, careerValues: newCareerValues }
       };
+    }
     
-    case 'TOGGLE_ACADEMIC_STRENGTH':
+    case 'TOGGLE_ACADEMIC_STRENGTH': {
       const strengthId = action.payload;
       const newStrengths = state.answers.academicStrengths.includes(strengthId)
         ? state.answers.academicStrengths.filter(id => id !== strengthId)
@@ -159,6 +162,7 @@ function questionnaireReducer(state: QuestionnaireState, action: QuestionnaireAc
         ...state,
         answers: { ...state.answers, academicStrengths: newStrengths }
       };
+    }
     
     default:
       return state;
