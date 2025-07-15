@@ -70,23 +70,35 @@ const ResultsPage = () => {
   };
 
   const handleRetakeQuiz = async () => {
-    // Check if user has previous results for comparison
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: previousResults } = await supabase
-        .from('recommendations')
-        .select('recommendations')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(2);
-      
-      if (previousResults && previousResults.length > 1) {
-        toast({
-          title: "📈 Ready for comparison!",
-          description: "Your new results will be compared to your previous attempt.",
-        });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Delete any existing incomplete questionnaire responses to start fresh
+        await supabase
+          .from('questionnaire_responses')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('is_completed', false);
+
+        // Check if user has previous results for comparison
+        const { data: previousResults } = await supabase
+          .from('recommendations')
+          .select('recommendations')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(2);
+        
+        if (previousResults && previousResults.length > 1) {
+          toast({
+            title: "📈 Ready for comparison!",
+            description: "Your new results will be compared to your previous attempt.",
+          });
+        }
       }
+    } catch (error) {
+      console.error('Error preparing retake:', error);
     }
+    
     navigate('/questionnaire');
   };
 
