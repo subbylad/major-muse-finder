@@ -218,12 +218,12 @@ const ResultsPage = () => {
                 <div>
                   <h4 className="text-foreground font-normal mb-3 text-base">Career paths</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {rec.career_paths?.map((career: string, idx: number) => (
+                    {rec.career_paths?.map((career: any, idx: number) => (
                       <div
                         key={idx}
                         className="px-3 py-2 bg-muted rounded text-muted-foreground text-sm"
                       >
-                        {career}
+                        {typeof career === 'string' ? career : `${career.role} - ${career.work_environment}`}
                       </div>
                     ))}
                   </div>
