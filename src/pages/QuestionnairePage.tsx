@@ -4,13 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuestionnaireState } from "@/hooks/useQuestionnaireState";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Calculator, FlaskConical, Palette, PenTool, Briefcase, Monitor, User, Users, Building, Blend, Brain, Lightbulb, Crown, Wrench, MessageCircle, DollarSign, Shield, Sparkles, Heart, Scale, Trophy, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { HollandCodeRanking } from "@/components/questionnaire/HollandCodeRanking";
+import { ScaleQuestion } from "@/components/questionnaire/ScaleQuestion";
 
 const QuestionnairePage = () => {
   const navigate = useNavigate();
@@ -23,7 +23,6 @@ const QuestionnairePage = () => {
 
   // Check if user is authenticated and load any existing progress
   useEffect(() => {
-    // Prevent infinite loops with a flag
     let isEffectActive = true;
     
     const checkAuthAndLoadProgress = async () => {
@@ -68,13 +67,11 @@ const QuestionnairePage = () => {
           .maybeSingle();
 
         if (queryError) {
-          // If there's a query error, start fresh
           actions.setResumingProgress(false);
           return;
         }
 
         if (existingResponse && isEffectActive) {
-          // Check if the response has valid data structure
           const hasValidData = existingResponse.question_1_interests || 
                               existingResponse.question_2_work_style || 
                               existingResponse.question_3_skills || 
@@ -82,7 +79,6 @@ const QuestionnairePage = () => {
                               existingResponse.question_5_academic_strengths;
           
           if (hasValidData) {
-            // Resume existing progress
             actions.setResponseId(existingResponse.id);
             loadProgressFromResponse(existingResponse);
             toast({
@@ -90,7 +86,6 @@ const QuestionnairePage = () => {
               description: "We found your previous questionnaire progress!",
             });
           } else {
-            // Delete the empty response and create a new one
             await supabase
               .from('questionnaire_responses')
               .delete()
@@ -107,7 +102,6 @@ const QuestionnairePage = () => {
             }
           }
         } else {
-          // Create new response
           const { data: newResponse, error } = await supabase
             .from('questionnaire_responses')
             .insert({ user_id: user.id })
@@ -144,76 +138,152 @@ const QuestionnairePage = () => {
       }
     };
     
-    // Only run if we're still in resuming state
     if (state.isResumingProgress) {
       checkAuthAndLoadProgress();
     }
     
-    // Cleanup function to prevent state updates if component unmounts
     return () => {
       isEffectActive = false;
     };
-  }, [state.isResumingProgress]); // Only depend on isResumingProgress to prevent loops
-  
-  
-  const subjectOptions = [
-    { id: "math", label: "Math", description: "Numbers, equations, problem-solving", icon: Calculator },
-    { id: "science", label: "Science", description: "Biology, chemistry, physics, research", icon: FlaskConical },
-    { id: "arts", label: "Arts", description: "Visual arts, design, creativity", icon: Palette },
-    { id: "writing", label: "Writing", description: "Literature, journalism, communication", icon: PenTool },
-    { id: "business", label: "Business", description: "Economics, management, entrepreneurship", icon: Briefcase },
-    { id: "technology", label: "Technology", description: "Programming, engineering, innovation", icon: Monitor }
-  ];
-  
-  // Question 2: Work preference
-  const workStyleOptions = [
-    { id: "independently", label: "Independently", description: "I work best on my own, with minimal supervision", icon: User },
-    { id: "small-teams", label: "In small teams", description: "I prefer collaborating with 2-4 people", icon: Users },
-    { id: "large-groups", label: "Large group projects", description: "I thrive in bigger collaborative environments", icon: Building },
-    { id: "mix", label: "Mix of both", description: "I enjoy variety in how I work", icon: Blend }
-  ];
+  }, [state.isResumingProgress]);
 
-  // Question 3: Skills confidence
-  const skillsOptions = [
-    { id: "problemSolving", label: "Problem Solving", description: "Analyzing issues and finding solutions", icon: Brain },
-    { id: "creativeThinking", label: "Creative Thinking", description: "Generating innovative ideas and approaches", icon: Lightbulb },
-    { id: "leadership", label: "Leadership", description: "Guiding and motivating others", icon: Crown },
-    { id: "technicalSkills", label: "Technical Skills", description: "Working with tools, software, or systems", icon: Wrench },
-    { id: "communication", label: "Communication", description: "Expressing ideas clearly and effectively", icon: MessageCircle }
-  ];
-
-  // Question 4: Career values
-  const careerValuesOptions = [
-    { id: "high-salary", label: "High salary", description: "Earning a competitive income and financial security", icon: DollarSign },
-    { id: "job-security", label: "Job security", description: "Stable employment and predictable career path", icon: Shield },
-    { id: "creative-freedom", label: "Creative freedom", description: "Autonomy to innovate and express creativity", icon: Sparkles },
-    { id: "helping-others", label: "Helping others", description: "Making a positive impact on people's lives", icon: Heart },
-    { id: "work-life-balance", label: "Work-life balance", description: "Manageable hours and personal time", icon: Scale },
-    { id: "leadership-opportunities", label: "Leadership opportunities", description: "Managing teams and driving organizational change", icon: Trophy }
-  ];
-
-  // Question 5: Academic strengths
-  const academicStrengthsOptions = [
-    { id: "mathematics", label: "Mathematics", description: "Algebra, calculus, statistics, problem-solving", icon: Calculator },
-    { id: "sciences", label: "Sciences", description: "Biology, chemistry, physics, research methods", icon: FlaskConical },
-    { id: "english-literature", label: "English/Literature", description: "Writing, reading comprehension, analysis", icon: PenTool },
-    { id: "history", label: "History", description: "Research, critical thinking, understanding context", icon: Crown },
-    { id: "foreign-languages", label: "Foreign Languages", description: "Communication, cultural understanding", icon: MessageCircle },
-    { id: "computer-science", label: "Computer Science", description: "Programming, logic, technology", icon: Monitor },
-    { id: "art", label: "Art", description: "Creativity, visual design, artistic expression", icon: Palette },
-    { id: "business", label: "Business", description: "Economics, management, entrepreneurship", icon: Briefcase }
-  ];
-
-  const handleSubjectToggle = (subjectId: string) => {
-    // Trigger selection animation
-    const element = document.querySelector(`[data-subject="${subjectId}"]`);
-    if (element && !state.selectedSubjects.includes(subjectId)) {
-      element.classList.add('selection-bounce');
-      setTimeout(() => element.classList.remove('selection-bounce'), 200);
+  // Question 1: Work Approach Options
+  const workApproachOptions = [
+    { 
+      id: "steady-planner", 
+      label: "Steady Planner", 
+      description: "I create a detailed timeline and work consistently each day" 
+    },
+    { 
+      id: "strategic-organizer", 
+      label: "Strategic Organizer", 
+      description: "I break it into phases, plan extensively, then execute systematically" 
+    },
+    { 
+      id: "motivated-sprinter", 
+      label: "Motivated Sprinter", 
+      description: "I wait until I feel inspired, then work intensively" 
+    },
+    { 
+      id: "deadline-driver", 
+      label: "Deadline Driver", 
+      description: "I work best under pressure in focused bursts near deadlines" 
+    },
+    { 
+      id: "collaborative-coordinator", 
+      label: "Collaborative Coordinator", 
+      description: "I prefer working with others for accountability" 
     }
-    
-    actions.toggleSubject(subjectId);
-  };
+  ];
+
+  // Question 3: Problem-solving options
+  const problemSolvingOptions = [
+    { 
+      id: "systematic-investigator", 
+      label: "Systematic Investigator", 
+      description: "Research extensively before making changes" 
+    },
+    { 
+      id: "iterative-experimenter", 
+      label: "Iterative Experimenter", 
+      description: "Try small improvements and learn from results" 
+    },
+    { 
+      id: "collaborative-problem-solver", 
+      label: "Collaborative Problem-Solver", 
+      description: "Gather stakeholder input and build consensus" 
+    },
+    { 
+      id: "strategic-redesigner", 
+      label: "Strategic Redesigner", 
+      description: "Question assumptions and envision major restructuring" 
+    }
+  ];
+
+  const groupProjectRoleOptions = [
+    { id: "technical-specialist", label: "Technical Specialist", description: "Focus on specific technical aspects" },
+    { id: "process-coordinator", label: "Process Coordinator", description: "Ensure deadlines and connections" },
+    { id: "strategic-planner", label: "Strategic Planner", description: "Design overall approach" },
+    { id: "relationship-manager", label: "Relationship Manager", description: "Facilitate communication" }
+  ];
+
+  // Question 4: Work-Life scenarios
+  const workLifeScenarioOptions = [
+    { 
+      id: "predictable-structure", 
+      label: "Predictable Structure", 
+      description: "Consistent hours, clear boundaries, job security" 
+    },
+    { 
+      id: "high-achievement", 
+      label: "High Achievement", 
+      description: "Variable hours, high earning potential, rapid advancement" 
+    },
+    { 
+      id: "geographic-flexibility", 
+      label: "Geographic Flexibility", 
+      description: "Willing to relocate, travel-heavy roles" 
+    },
+    { 
+      id: "community-rooted", 
+      label: "Community Rooted", 
+      description: "Stay local, work-life integration, moderate travel" 
+    },
+    { 
+      id: "entrepreneurial-freedom", 
+      label: "Entrepreneurial Freedom", 
+      description: "Flexible schedule, high risk/reward" 
+    },
+    { 
+      id: "mission-driven-impact", 
+      label: "Mission-Driven Impact", 
+      description: "Values-aligned work, societal contribution" 
+    }
+  ];
+
+  // Question 5: Field exposure options
+  const fieldExposureOptions = [
+    { 
+      id: "direct-observation", 
+      label: "Direct Observation", 
+      description: "Shadowed professionals or visited workplaces" 
+    },
+    { 
+      id: "hands-on-experience", 
+      label: "Hands-On Experience", 
+      description: "Internships, volunteer work, or projects" 
+    },
+    { 
+      id: "informational-interviews", 
+      label: "Informational Interviews", 
+      description: "Spoke with professionals about their work" 
+    },
+    { 
+      id: "academic-exploration", 
+      label: "Academic Exploration", 
+      description: "Relevant courses or workshops" 
+    },
+    { 
+      id: "online-research", 
+      label: "Online Research", 
+      description: "Researched career realities online" 
+    },
+    { 
+      id: "limited-exposure", 
+      label: "Limited Exposure", 
+      description: "Interest based mainly on general ideas" 
+    }
+  ];
+
+  const fieldSurpriseOptions = [
+    { id: "work-reality", label: "Work Reality", description: "Daily tasks were different than expected" },
+    { id: "education-requirements", label: "Education Requirements", description: "Preparation needed was different" },
+    { id: "people-skills", label: "People Skills", description: "More interpersonal interaction than thought" },
+    { id: "problem-types", label: "Problem Types", description: "Kinds of problems were unexpected" },
+    { id: "career-paths", label: "Career Paths", description: "More diverse opportunities than realized" },
+    { id: "work-environment", label: "Work Environment", description: "Workplace culture/setting was different" },
+    { id: "still-learning", label: "Still Learning", description: "Haven't had enough exposure yet" }
+  ];
 
   // Load progress from existing response
   const loadProgressFromResponse = (response: any) => {
@@ -221,27 +291,27 @@ const QuestionnairePage = () => {
     const progress: any = {};
     
     if (response.question_1_interests) {
-      progress.interests = response.question_1_interests;
+      progress.workApproach = response.question_1_interests;
       step = 2;
     }
     
     if (response.question_2_work_style) {
-      progress.workStyle = response.question_2_work_style;
+      progress.hollandCodeRanking = response.question_2_work_style;
       step = 3;
     }
     
     if (response.question_3_skills) {
-      progress.skillsConfidence = response.question_3_skills;
+      progress.problemSolvingApproach = response.question_3_skills;
       step = 4;
     }
     
     if (response.question_4_values) {
-      progress.careerValues = response.question_4_values;
+      progress.workLifeScenarios = response.question_4_values;
       step = 5;
     }
     
     if (response.question_5_academic_strengths) {
-      progress.academicStrengths = response.question_5_academic_strengths;
+      progress.fieldExposure = response.question_5_academic_strengths;
     }
     
     actions.loadProgress({ ...progress, step });
@@ -265,68 +335,45 @@ const QuestionnairePage = () => {
     }
   };
 
-  const handleWorkStyleChange = (value: string) => {
-    actions.setWorkStyle(value);
-  };
-
-  const handleSkillConfidenceChange = (skillId: string, value: number[]) => {
-    actions.setSkillConfidence(skillId, value);
-  };
-
-
   const handleNext = async () => {
     if (state.currentStep === 1) {
-      if (state.selectedSubjects.length === 0) return;
+      if (!state.answers.workApproach) return;
       
-      // Save to database
-      await saveProgress({ question_1_interests: state.selectedSubjects });
-      
+      await saveProgress({ question_1_interests: state.answers.workApproach });
       setTimeout(() => actions.setCurrentStep(2), 100);
     } else if (state.currentStep === 2) {
-      if (!state.answers.workStyle) return;
-      
-      // Save work style to database
-      await saveProgress({ question_2_work_style: state.answers.workStyle });
-      
+      await saveProgress({ question_2_work_style: state.answers.hollandCodeRanking });
       setTimeout(() => actions.setCurrentStep(3), 100);
     } else if (state.currentStep === 3) {
-      // Save skills to database
-      await saveProgress({ question_3_skills: state.answers.skillsConfidence });
+      if (!state.answers.problemSolvingApproach) return;
       
+      await saveProgress({ question_3_skills: state.answers.problemSolvingApproach });
       setTimeout(() => actions.setCurrentStep(4), 100);
     } else if (state.currentStep === 4) {
-      if (state.answers.careerValues.length === 0) return;
+      if (state.answers.workLifeScenarios.length !== 2) return;
       
-      // Save career values to database
-      await saveProgress({ question_4_values: state.answers.careerValues });
-      
+      await saveProgress({ question_4_values: state.answers.workLifeScenarios });
       setTimeout(() => actions.setCurrentStep(5), 100);
     } else if (state.currentStep === 5) {
-      if (state.answers.academicStrengths.length === 0) return;
+      if (state.answers.fieldExposure.length === 0) return;
       
-      // Questionnaire complete, save final answer and generate recommendations
       actions.setLoading(true);
       
-      // Prepare final answers outside try block so it's accessible in catch
       const finalAnswers = {
-        ...state.answers,
-        interests: state.selectedSubjects,
-        academicStrengths: state.answers.academicStrengths
+        ...state.answers
       };
       
       try {
-        // Check if user is authenticated
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           navigate('/auth');
           return;
         }
 
-        // Save final answer and mark as completed
         const { error: updateError } = await supabase
           .from('questionnaire_responses')
           .update({
-            question_5_academic_strengths: state.answers.academicStrengths,
+            question_5_academic_strengths: state.answers.fieldExposure,
             is_completed: true,
             completed_at: new Date().toISOString()
           })
@@ -355,7 +402,6 @@ const QuestionnairePage = () => {
           throw new Error('AI service returned empty response');
         }
 
-        // Save recommendations to database
         const { error: recommendationError } = await supabase
           .from('recommendations')
           .insert({
@@ -365,11 +411,9 @@ const QuestionnairePage = () => {
           });
 
         if (recommendationError) {
-          // Don't fail the whole flow if saving recommendations fails
           console.error('Error saving recommendations:', recommendationError);
         }
 
-        // Navigate to results with the recommendations
         navigate('/results', { 
           state: { 
             recommendations: response.data,
@@ -378,73 +422,35 @@ const QuestionnairePage = () => {
           } 
         });
       } catch (error) {
-        // Check if it's a specific AI service error
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         
-        if (errorMessage.includes('timeout')) {
-          toast({
-            title: "Request Timeout",
-            description: "AI service is taking too long. Using backup recommendations.",
-            variant: "default",
-          });
-        } else if (errorMessage.includes('not found') || errorMessage.includes('404')) {
-          toast({
-            title: "Service Unavailable", 
-            description: "AI service not deployed. Using backup recommendations.",
-            variant: "default",
-          });
-        } else {
-          toast({
-            title: "AI Service Error",
-            description: `${errorMessage}. Using backup recommendations.`,
-            variant: "default",
-          });
-        }
+        toast({
+          title: "AI Service Error",
+          description: `${errorMessage}. Using backup recommendations.`,
+          variant: "default",
+        });
         
-        // Fallback recommendations when AI service fails
+        // Fallback recommendations
         const fallbackRecommendations = {
           recommendations: [
             {
-              major: "Computer Science",
-              confidence: 85,
-              reasoning: "Based on your responses, you show strong analytical thinking and interest in technology. Computer Science offers diverse career opportunities in software development, AI, and tech innovation.",
-              career_paths: ["Software Developer", "Data Scientist", "Product Manager", "Tech Entrepreneur"],
-              why_good_fit: "Your technical aptitude and problem-solving skills align well with this field",
-              considerations: "Requires continuous learning as technology evolves rapidly"
-            },
-            {
               major: "Business Administration",
-              confidence: 78,
-              reasoning: "Your leadership qualities and strategic thinking make you well-suited for business roles. This major provides versatility across industries.",
+              confidence: 85,
+              reasoning: "Based on your responses, you show strong organizational and leadership capabilities. Business Administration offers diverse career opportunities across all industries.",
               career_paths: ["Management Consultant", "Marketing Manager", "Operations Director", "Business Analyst"],
-              why_good_fit: "Your communication skills and goal-oriented approach match business environments",
+              why_good_fit: "Your strategic thinking and communication skills align well with business environments",
               considerations: "Consider specializing in an area that matches your specific interests"
-            },
-            {
-              major: "Psychology",
-              confidence: 72,
-              reasoning: "Your interest in understanding people and helping others indicates a strong fit for psychology and human-centered fields.",
-              career_paths: ["Clinical Psychologist", "HR Specialist", "UX Researcher", "Counselor"],
-              why_good_fit: "Your empathy and analytical skills are valuable in understanding human behavior",
-              considerations: "May require additional graduate education for certain career paths"
             }
           ],
-          summary: "We encountered an issue with our AI service, so we've provided general recommendations based on common career paths. For personalized results, please try again or consult with an academic advisor."
+          summary: "We encountered an issue with our AI service, so we've provided general recommendations. For personalized results, please try again later."
         };
 
-        // Navigate to results with fallback data
         navigate('/results', { 
           state: { 
             recommendations: fallbackRecommendations,
             answers: finalAnswers,
             responseId: state.responseId
           } 
-        });
-        
-        toast({
-          title: "Using Backup Recommendations",
-          description: "We provided general recommendations. Try again later for personalized results.",
-          variant: "default",
         });
       }
     }
@@ -460,7 +466,7 @@ const QuestionnairePage = () => {
     } else if (state.currentStep === 2) {
       actions.setCurrentStep(1);
     } else if (state.currentStep === 1) {
-      navigate("/auth");
+      navigate("/");
     }
   };
 
@@ -481,7 +487,7 @@ const QuestionnairePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-4xl py-8 px-8">
-        {/* Header - Minimal */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-16">
           <Button
             variant="ghost"
@@ -493,11 +499,11 @@ const QuestionnairePage = () => {
           </Button>
           
           <div className="text-sm font-normal text-muted-foreground">
-            {state.currentStep} of {totalSteps}
+            Question {state.currentStep} of {totalSteps}
           </div>
         </div>
 
-        {/* Progress - Minimal */}
+        {/* Progress */}
         <div className="mb-20">
           <div className="w-full bg-border h-px mb-8">
             <div 
@@ -507,80 +513,34 @@ const QuestionnairePage = () => {
           </div>
         </div>
 
-        {/* Question Section - Minimal */}
+        {/* Question Section */}
         <div className="mb-16">
           {state.currentStep === 1 && (
             <>
               <div className="text-center mb-12">
                 <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
-                  What subjects excite you most?
+                  Work Style & Self-Regulation
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
-                  Select all that apply. Choose the subjects that genuinely interest and energize you.
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal mb-8">
+                  When facing a challenging long-term project, which approach best describes you?
                 </p>
               </div>
               
-              <div className="space-y-3 max-w-2xl mx-auto">
-                {subjectOptions.map((option) => (
-                  <div
-                    key={option.id}
-                    data-subject={option.id}
-                    className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                      state.selectedSubjects.includes(option.id)
-                        ? "border-foreground bg-muted/30"
-                        : "border-border hover:border-muted-foreground"
-                    }`}
-                    onClick={() => handleSubjectToggle(option.id)}
-                  >
-                    <Checkbox
-                      id={option.id}
-                      checked={state.selectedSubjects.includes(option.id)}
-                      onCheckedChange={() => handleSubjectToggle(option.id)}
-                      className="w-5 h-5"
-                    />
-                    <div className="flex-1">
-                      <label
-                        htmlFor={option.id}
-                        className="font-normal leading-none cursor-pointer text-lg block mb-1"
-                      >
-                        {option.label}
-                      </label>
-                      <p className="text-muted-foreground leading-relaxed text-sm">
-                        {option.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {state.currentStep === 2 && (
-            <>
-              <div className="text-center mb-12">
-                <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
-                  How do you prefer to work?
-                </h1>
-                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
-                  Select the working style that best describes your preference.
-                </p>
-              </div>
-              
-              <div className="max-w-2xl mx-auto">
+              <div className="max-w-2xl mx-auto mb-8">
                 <RadioGroup 
-                  value={state.answers.workStyle} 
-                  onValueChange={handleWorkStyleChange}
+                  value={state.answers.workApproach} 
+                  onValueChange={actions.setWorkApproach}
                   className="space-y-3"
                 >
-                  {workStyleOptions.map((option) => (
+                  {workApproachOptions.map((option) => (
                     <div
                       key={option.id}
                       className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                        state.answers.workStyle === option.id
+                        state.answers.workApproach === option.id
                           ? "border-foreground bg-muted/30"
                           : "border-border hover:border-muted-foreground"
                       }`}
-                      onClick={() => handleWorkStyleChange(option.id)}
+                      onClick={() => actions.setWorkApproach(option.id)}
                     >
                       <RadioGroupItem
                         value={option.id}
@@ -590,7 +550,7 @@ const QuestionnairePage = () => {
                       <div className="flex-1">
                         <Label
                           htmlFor={option.id}
-                          className="font-normal leading-none cursor-pointer text-lg block mb-1"
+                          className="font-medium leading-none cursor-pointer text-lg block mb-1"
                         >
                           {option.label}
                         </Label>
@@ -602,6 +562,36 @@ const QuestionnairePage = () => {
                   ))}
                 </RadioGroup>
               </div>
+
+              {state.answers.workApproach && (
+                <div className="max-w-2xl mx-auto">
+                  <ScaleQuestion
+                    title="Rate your consistency in following through on commitments:"
+                    value={state.answers.commitmentReliability}
+                    onChange={actions.setCommitmentReliability}
+                    leftLabel="Often miss commitments"
+                    rightLabel="Extremely reliable"
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+          {state.currentStep === 2 && (
+            <>
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
+                  Interest Areas Ranking
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
+                  Rank these activity categories from MOST to LEAST interesting:
+                </p>
+              </div>
+              
+              <HollandCodeRanking
+                items={state.answers.hollandCodeRanking}
+                onReorder={actions.setHollandCodeRanking}
+              />
             </>
           )}
 
@@ -609,41 +599,89 @@ const QuestionnairePage = () => {
             <>
               <div className="text-center mb-12">
                 <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
-                  Rate your confidence in these areas
+                  Problem-Solving Approach
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
-                  Use the scale from 1 (low confidence) to 5 (high confidence) to rate yourself.
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal mb-8">
+                  You're improving a system that isn't working well. Your approach:
                 </p>
               </div>
               
-              <div className="space-y-8 max-w-3xl mx-auto">
-                {skillsOptions.map((skill) => (
-                  <div key={skill.id} className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Label className="text-lg font-normal text-foreground">{skill.label}</Label>
-                        <p className="text-muted-foreground mt-1 leading-relaxed text-sm">{skill.description}</p>
-                      </div>
-                      <div className="text-lg font-normal text-foreground min-w-8 text-center">
-                        {state.answers.skillsConfidence[skill.id as keyof typeof state.answers.skillsConfidence][0]}
+              <div className="max-w-2xl mx-auto mb-8">
+                <RadioGroup 
+                  value={state.answers.problemSolvingApproach} 
+                  onValueChange={actions.setProblemSolvingApproach}
+                  className="space-y-3"
+                >
+                  {problemSolvingOptions.map((option) => (
+                    <div
+                      key={option.id}
+                      className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                        state.answers.problemSolvingApproach === option.id
+                          ? "border-foreground bg-muted/30"
+                          : "border-border hover:border-muted-foreground"
+                      }`}
+                      onClick={() => actions.setProblemSolvingApproach(option.id)}
+                    >
+                      <RadioGroupItem
+                        value={option.id}
+                        id={option.id}
+                        className="w-5 h-5"
+                      />
+                      <div className="flex-1">
+                        <Label
+                          htmlFor={option.id}
+                          className="font-medium leading-none cursor-pointer text-lg block mb-1"
+                        >
+                          {option.label}
+                        </Label>
+                        <p className="text-muted-foreground leading-relaxed text-sm">
+                          {option.description}
+                        </p>
                       </div>
                     </div>
-                    <Slider
-                      value={state.answers.skillsConfidence[skill.id as keyof typeof state.answers.skillsConfidence]}
-                      onValueChange={(value) => handleSkillConfidenceChange(skill.id, value)}
-                      max={5}
-                      min={1}
-                      step={1}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Low</span>
-                      <span>Average</span>
-                      <span>High</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </RadioGroup>
               </div>
+
+              {state.answers.problemSolvingApproach && (
+                <div className="max-w-2xl mx-auto">
+                  <h3 className="text-xl font-normal mb-6 text-center">In group projects, you typically:</h3>
+                  <RadioGroup 
+                    value={state.answers.groupProjectRole} 
+                    onValueChange={actions.setGroupProjectRole}
+                    className="space-y-3"
+                  >
+                    {groupProjectRoleOptions.map((option) => (
+                      <div
+                        key={option.id}
+                        className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                          state.answers.groupProjectRole === option.id
+                            ? "border-foreground bg-muted/30"
+                            : "border-border hover:border-muted-foreground"
+                        }`}
+                        onClick={() => actions.setGroupProjectRole(option.id)}
+                      >
+                        <RadioGroupItem
+                          value={option.id}
+                          id={option.id}
+                          className="w-5 h-5"
+                        />
+                        <div className="flex-1">
+                          <Label
+                            htmlFor={option.id}
+                            className="font-medium leading-none cursor-pointer text-lg block mb-1"
+                          >
+                            {option.label}
+                          </Label>
+                          <p className="text-muted-foreground leading-relaxed text-sm">
+                            {option.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              )}
             </>
           )}
 
@@ -651,47 +689,47 @@ const QuestionnairePage = () => {
             <>
               <div className="text-center mb-12">
                 <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
-                  What's most important to you in a career?
+                  Work-Life Preferences
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
-                  Select up to 2 values that matter most to you in your future career.
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal mb-8">
+                  Select the TWO work-life scenarios that appeal to you most:
                 </p>
               </div>
               
-              <div className="space-y-3 max-w-2xl mx-auto">
-                {careerValuesOptions.map((option) => (
+              <div className="space-y-3 max-w-2xl mx-auto mb-8">
+                {workLifeScenarioOptions.map((option) => (
                   <div
                     key={option.id}
                     className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                      state.answers.careerValues.includes(option.id)
+                      state.answers.workLifeScenarios.includes(option.id)
                         ? "border-foreground bg-muted/30"
                         : "border-border hover:border-muted-foreground"
                     } ${
-                      !state.answers.careerValues.includes(option.id) && state.answers.careerValues.length >= 2
+                      !state.answers.workLifeScenarios.includes(option.id) && state.answers.workLifeScenarios.length >= 2
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}
                     onClick={() => {
-                      if (state.answers.careerValues.includes(option.id) || state.answers.careerValues.length < 2) {
-                        actions.toggleCareerValue(option.id);
+                      if (state.answers.workLifeScenarios.includes(option.id) || state.answers.workLifeScenarios.length < 2) {
+                        actions.toggleWorkLifeScenario(option.id);
                       }
                     }}
                   >
                     <Checkbox
                       id={option.id}
-                      checked={state.answers.careerValues.includes(option.id)}
+                      checked={state.answers.workLifeScenarios.includes(option.id)}
                       onCheckedChange={() => {
-                        if (state.answers.careerValues.includes(option.id) || state.answers.careerValues.length < 2) {
-                          actions.toggleCareerValue(option.id);
+                        if (state.answers.workLifeScenarios.includes(option.id) || state.answers.workLifeScenarios.length < 2) {
+                          actions.toggleWorkLifeScenario(option.id);
                         }
                       }}
                       className="w-5 h-5"
-                      disabled={!state.answers.careerValues.includes(option.id) && state.answers.careerValues.length >= 2}
+                      disabled={!state.answers.workLifeScenarios.includes(option.id) && state.answers.workLifeScenarios.length >= 2}
                     />
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="font-normal leading-none cursor-pointer text-lg block mb-1"
+                        className="font-medium leading-none cursor-pointer text-lg block mb-1"
                       >
                         {option.label}
                       </label>
@@ -702,6 +740,18 @@ const QuestionnairePage = () => {
                   </div>
                 ))}
               </div>
+
+              {state.answers.workLifeScenarios.length === 2 && (
+                <div className="max-w-2xl mx-auto">
+                  <ScaleQuestion
+                    title="Comfort with work uncertainty:"
+                    value={state.answers.uncertaintyComfort}
+                    onChange={actions.setUncertaintyComfort}
+                    leftLabel="Prefer clear procedures"
+                    rightLabel="Thrive in uncertain environments"
+                  />
+                </div>
+              )}
             </>
           )}
 
@@ -709,34 +759,34 @@ const QuestionnairePage = () => {
             <>
               <div className="text-center mb-12">
                 <h1 className="text-4xl md:text-5xl font-normal mb-6 text-foreground leading-tight tracking-tight">
-                  Which academic subjects are you strongest in?
+                  Field Exposure & Experience
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal">
-                  Select all subjects where you excel or have demonstrated strong performance.
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-normal mb-8">
+                  Describe your exposure to your field(s) of interest (select all that apply):
                 </p>
               </div>
               
-              <div className="space-y-3 max-w-2xl mx-auto">
-                {academicStrengthsOptions.map((option) => (
+              <div className="space-y-3 max-w-2xl mx-auto mb-8">
+                {fieldExposureOptions.map((option) => (
                   <div
                     key={option.id}
                     className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                      state.answers.academicStrengths.includes(option.id)
+                      state.answers.fieldExposure.includes(option.id)
                         ? "border-foreground bg-muted/30"
                         : "border-border hover:border-muted-foreground"
                     }`}
-                    onClick={() => actions.toggleAcademicStrength(option.id)}
+                    onClick={() => actions.toggleFieldExposure(option.id)}
                   >
                     <Checkbox
                       id={option.id}
-                      checked={state.answers.academicStrengths.includes(option.id)}
-                      onCheckedChange={() => actions.toggleAcademicStrength(option.id)}
+                      checked={state.answers.fieldExposure.includes(option.id)}
+                      onCheckedChange={() => actions.toggleFieldExposure(option.id)}
                       className="w-5 h-5"
                     />
                     <div className="flex-1">
                       <label
                         htmlFor={option.id}
-                        className="font-normal leading-none cursor-pointer text-lg block mb-1"
+                        className="font-medium leading-none cursor-pointer text-lg block mb-1"
                       >
                         {option.label}
                       </label>
@@ -747,6 +797,46 @@ const QuestionnairePage = () => {
                   </div>
                 ))}
               </div>
+
+              {state.answers.fieldExposure.length > 0 && (
+                <div className="max-w-2xl mx-auto">
+                  <h3 className="text-xl font-normal mb-6 text-center">What surprised you most about your field of interest:</h3>
+                  <RadioGroup 
+                    value={state.answers.fieldSurprise} 
+                    onValueChange={actions.setFieldSurprise}
+                    className="space-y-3"
+                  >
+                    {fieldSurpriseOptions.map((option) => (
+                      <div
+                        key={option.id}
+                        className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                          state.answers.fieldSurprise === option.id
+                            ? "border-foreground bg-muted/30"
+                            : "border-border hover:border-muted-foreground"
+                        }`}
+                        onClick={() => actions.setFieldSurprise(option.id)}
+                      >
+                        <RadioGroupItem
+                          value={option.id}
+                          id={option.id}
+                          className="w-5 h-5"
+                        />
+                        <div className="flex-1">
+                          <Label
+                            htmlFor={option.id}
+                            className="font-medium leading-none cursor-pointer text-lg block mb-1"
+                          >
+                            {option.label}
+                          </Label>
+                          <p className="text-muted-foreground leading-relaxed text-sm">
+                            {option.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              )}
             </>
           )}
         </div>

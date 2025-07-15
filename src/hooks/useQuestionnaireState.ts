@@ -1,17 +1,24 @@
 import { useReducer, useCallback } from 'react';
 
 export interface QuestionnaireAnswers {
-  interests: string[];
-  workStyle: string;
-  skillsConfidence: {
-    problemSolving: number[];
-    creativeThinking: number[];
-    leadership: number[];
-    technicalSkills: number[];
-    communication: number[];
-  };
-  careerValues: string[];
-  academicStrengths: string[];
+  // Question 1: Conscientiousness Assessment
+  workApproach: string;
+  commitmentReliability: number[];
+  
+  // Question 2: Holland Code Interests (ranking)
+  hollandCodeRanking: string[];
+  
+  // Question 3: Problem-solving style
+  problemSolvingApproach: string;
+  groupProjectRole: string;
+  
+  // Question 4: Work-life integration
+  workLifeScenarios: string[];
+  uncertaintyComfort: number[];
+  
+  // Question 5: Environmental exploration
+  fieldExposure: string[];
+  fieldSurprise: string;
 }
 
 interface QuestionnaireState {
@@ -25,33 +32,34 @@ interface QuestionnaireState {
 
 type QuestionnaireAction =
   | { type: 'SET_CURRENT_STEP'; payload: number }
-  | { type: 'SET_SELECTED_SUBJECTS'; payload: string[] }
-  | { type: 'SET_WORK_STYLE'; payload: string }
-  | { type: 'SET_SKILL_CONFIDENCE'; payload: { skillId: string; value: number[] } }
-  | { type: 'SET_CAREER_VALUES'; payload: string[] }
-  | { type: 'SET_ACADEMIC_STRENGTHS'; payload: string[] }
+  | { type: 'SET_WORK_APPROACH'; payload: string }
+  | { type: 'SET_COMMITMENT_RELIABILITY'; payload: number[] }
+  | { type: 'SET_HOLLAND_CODE_RANKING'; payload: string[] }
+  | { type: 'SET_PROBLEM_SOLVING_APPROACH'; payload: string }
+  | { type: 'SET_GROUP_PROJECT_ROLE'; payload: string }
+  | { type: 'SET_WORK_LIFE_SCENARIOS'; payload: string[] }
+  | { type: 'SET_UNCERTAINTY_COMFORT'; payload: number[] }
+  | { type: 'SET_FIELD_EXPOSURE'; payload: string[] }
+  | { type: 'SET_FIELD_SURPRISE'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_RESPONSE_ID'; payload: string }
   | { type: 'SET_RESUMING_PROGRESS'; payload: boolean }
   | { type: 'LOAD_PROGRESS'; payload: Partial<QuestionnaireAnswers> & { step?: number } }
-  | { type: 'TOGGLE_SUBJECT'; payload: string }
-  | { type: 'TOGGLE_CAREER_VALUE'; payload: string }
-  | { type: 'TOGGLE_ACADEMIC_STRENGTH'; payload: string };
+  | { type: 'TOGGLE_WORK_LIFE_SCENARIO'; payload: string }
+  | { type: 'TOGGLE_FIELD_EXPOSURE'; payload: string };
 
 const initialState: QuestionnaireState = {
   currentStep: 1,
   answers: {
-    interests: [],
-    workStyle: '',
-    skillsConfidence: {
-      problemSolving: [3],
-      creativeThinking: [3],
-      leadership: [3],
-      technicalSkills: [3],
-      communication: [3]
-    },
-    careerValues: [],
-    academicStrengths: []
+    workApproach: '',
+    commitmentReliability: [3],
+    hollandCodeRanking: ['realistic', 'investigative', 'artistic', 'social', 'enterprising', 'conventional'],
+    problemSolvingApproach: '',
+    groupProjectRole: '',
+    workLifeScenarios: [],
+    uncertaintyComfort: [3],
+    fieldExposure: [],
+    fieldSurprise: ''
   },
   selectedSubjects: [],
   isLoading: false,
@@ -64,41 +72,58 @@ function questionnaireReducer(state: QuestionnaireState, action: QuestionnaireAc
     case 'SET_CURRENT_STEP':
       return { ...state, currentStep: action.payload };
     
-    case 'SET_SELECTED_SUBJECTS':
+    case 'SET_WORK_APPROACH':
       return { 
         ...state, 
-        selectedSubjects: action.payload,
-        answers: { ...state.answers, interests: action.payload }
+        answers: { ...state.answers, workApproach: action.payload }
       };
     
-    case 'SET_WORK_STYLE':
-      return { 
-        ...state, 
-        answers: { ...state.answers, workStyle: action.payload }
-      };
-    
-    case 'SET_SKILL_CONFIDENCE':
+    case 'SET_COMMITMENT_RELIABILITY':
       return {
         ...state,
-        answers: {
-          ...state.answers,
-          skillsConfidence: {
-            ...state.answers.skillsConfidence,
-            [action.payload.skillId]: action.payload.value
-          }
-        }
+        answers: { ...state.answers, commitmentReliability: action.payload }
       };
     
-    case 'SET_CAREER_VALUES':
+    case 'SET_HOLLAND_CODE_RANKING':
       return {
         ...state,
-        answers: { ...state.answers, careerValues: action.payload }
+        answers: { ...state.answers, hollandCodeRanking: action.payload }
       };
     
-    case 'SET_ACADEMIC_STRENGTHS':
+    case 'SET_PROBLEM_SOLVING_APPROACH':
       return {
         ...state,
-        answers: { ...state.answers, academicStrengths: action.payload }
+        answers: { ...state.answers, problemSolvingApproach: action.payload }
+      };
+    
+    case 'SET_GROUP_PROJECT_ROLE':
+      return {
+        ...state,
+        answers: { ...state.answers, groupProjectRole: action.payload }
+      };
+    
+    case 'SET_WORK_LIFE_SCENARIOS':
+      return {
+        ...state,
+        answers: { ...state.answers, workLifeScenarios: action.payload }
+      };
+    
+    case 'SET_UNCERTAINTY_COMFORT':
+      return {
+        ...state,
+        answers: { ...state.answers, uncertaintyComfort: action.payload }
+      };
+    
+    case 'SET_FIELD_EXPOSURE':
+      return {
+        ...state,
+        answers: { ...state.answers, fieldExposure: action.payload }
+      };
+    
+    case 'SET_FIELD_SURPRISE':
+      return {
+        ...state,
+        answers: { ...state.answers, fieldSurprise: action.payload }
       };
     
     case 'SET_LOADING':
@@ -115,52 +140,38 @@ function questionnaireReducer(state: QuestionnaireState, action: QuestionnaireAc
       return {
         ...state,
         currentStep: step || state.currentStep,
-        answers: { ...state.answers, ...answers },
-        selectedSubjects: answers.interests || state.selectedSubjects
+        answers: { ...state.answers, ...answers }
       };
     }
     
-    case 'TOGGLE_SUBJECT': {
-      const subjectId = action.payload;
-      const newSelectedSubjects = state.selectedSubjects.includes(subjectId)
-        ? state.selectedSubjects.filter(id => id !== subjectId)
-        : [...state.selectedSubjects, subjectId];
+    case 'TOGGLE_WORK_LIFE_SCENARIO': {
+      const scenarioId = action.payload;
+      const currentScenarios = state.answers.workLifeScenarios;
+      let newScenarios: string[];
       
-      return {
-        ...state,
-        selectedSubjects: newSelectedSubjects,
-        answers: { ...state.answers, interests: newSelectedSubjects }
-      };
-    }
-    
-    case 'TOGGLE_CAREER_VALUE': {
-      const valueId = action.payload;
-      const currentValues = state.answers.careerValues;
-      let newCareerValues: string[];
-      
-      if (currentValues.includes(valueId)) {
-        newCareerValues = currentValues.filter(id => id !== valueId);
-      } else if (currentValues.length < 2) {
-        newCareerValues = [...currentValues, valueId];
+      if (currentScenarios.includes(scenarioId)) {
+        newScenarios = currentScenarios.filter(id => id !== scenarioId);
+      } else if (currentScenarios.length < 2) {
+        newScenarios = [...currentScenarios, scenarioId];
       } else {
-        newCareerValues = currentValues;
+        newScenarios = currentScenarios;
       }
       
       return {
         ...state,
-        answers: { ...state.answers, careerValues: newCareerValues }
+        answers: { ...state.answers, workLifeScenarios: newScenarios }
       };
     }
     
-    case 'TOGGLE_ACADEMIC_STRENGTH': {
-      const strengthId = action.payload;
-      const newStrengths = state.answers.academicStrengths.includes(strengthId)
-        ? state.answers.academicStrengths.filter(id => id !== strengthId)
-        : [...state.answers.academicStrengths, strengthId];
+    case 'TOGGLE_FIELD_EXPOSURE': {
+      const exposureId = action.payload;
+      const newExposure = state.answers.fieldExposure.includes(exposureId)
+        ? state.answers.fieldExposure.filter(id => id !== exposureId)
+        : [...state.answers.fieldExposure, exposureId];
       
       return {
         ...state,
-        answers: { ...state.answers, academicStrengths: newStrengths }
+        answers: { ...state.answers, fieldExposure: newExposure }
       };
     }
     
@@ -177,24 +188,40 @@ export function useQuestionnaireState() {
       dispatch({ type: 'SET_CURRENT_STEP', payload: step });
     }, []),
 
-    setSelectedSubjects: useCallback((subjects: string[]) => {
-      dispatch({ type: 'SET_SELECTED_SUBJECTS', payload: subjects });
+    setWorkApproach: useCallback((approach: string) => {
+      dispatch({ type: 'SET_WORK_APPROACH', payload: approach });
     }, []),
 
-    setWorkStyle: useCallback((workStyle: string) => {
-      dispatch({ type: 'SET_WORK_STYLE', payload: workStyle });
+    setCommitmentReliability: useCallback((value: number[]) => {
+      dispatch({ type: 'SET_COMMITMENT_RELIABILITY', payload: value });
     }, []),
 
-    setSkillConfidence: useCallback((skillId: string, value: number[]) => {
-      dispatch({ type: 'SET_SKILL_CONFIDENCE', payload: { skillId, value } });
+    setHollandCodeRanking: useCallback((ranking: string[]) => {
+      dispatch({ type: 'SET_HOLLAND_CODE_RANKING', payload: ranking });
     }, []),
 
-    setCareerValues: useCallback((values: string[]) => {
-      dispatch({ type: 'SET_CAREER_VALUES', payload: values });
+    setProblemSolvingApproach: useCallback((approach: string) => {
+      dispatch({ type: 'SET_PROBLEM_SOLVING_APPROACH', payload: approach });
     }, []),
 
-    setAcademicStrengths: useCallback((strengths: string[]) => {
-      dispatch({ type: 'SET_ACADEMIC_STRENGTHS', payload: strengths });
+    setGroupProjectRole: useCallback((role: string) => {
+      dispatch({ type: 'SET_GROUP_PROJECT_ROLE', payload: role });
+    }, []),
+
+    setWorkLifeScenarios: useCallback((scenarios: string[]) => {
+      dispatch({ type: 'SET_WORK_LIFE_SCENARIOS', payload: scenarios });
+    }, []),
+
+    setUncertaintyComfort: useCallback((value: number[]) => {
+      dispatch({ type: 'SET_UNCERTAINTY_COMFORT', payload: value });
+    }, []),
+
+    setFieldExposure: useCallback((exposure: string[]) => {
+      dispatch({ type: 'SET_FIELD_EXPOSURE', payload: exposure });
+    }, []),
+
+    setFieldSurprise: useCallback((surprise: string) => {
+      dispatch({ type: 'SET_FIELD_SURPRISE', payload: surprise });
     }, []),
 
     setLoading: useCallback((loading: boolean) => {
@@ -213,26 +240,22 @@ export function useQuestionnaireState() {
       dispatch({ type: 'LOAD_PROGRESS', payload: progress });
     }, []),
 
-    toggleSubject: useCallback((subjectId: string) => {
-      dispatch({ type: 'TOGGLE_SUBJECT', payload: subjectId });
+    toggleWorkLifeScenario: useCallback((scenarioId: string) => {
+      dispatch({ type: 'TOGGLE_WORK_LIFE_SCENARIO', payload: scenarioId });
     }, []),
 
-    toggleCareerValue: useCallback((valueId: string) => {
-      dispatch({ type: 'TOGGLE_CAREER_VALUE', payload: valueId });
-    }, []),
-
-    toggleAcademicStrength: useCallback((strengthId: string) => {
-      dispatch({ type: 'TOGGLE_ACADEMIC_STRENGTH', payload: strengthId });
+    toggleFieldExposure: useCallback((exposureId: string) => {
+      dispatch({ type: 'TOGGLE_FIELD_EXPOSURE', payload: exposureId });
     }, []),
   };
 
   const canProceed = useCallback(() => {
-    const { currentStep, selectedSubjects, answers } = state;
-    if (currentStep === 1) return selectedSubjects.length > 0;
-    if (currentStep === 2) return answers.workStyle !== '';
-    if (currentStep === 3) return true; // Skills have default values
-    if (currentStep === 4) return answers.careerValues.length > 0;
-    if (currentStep === 5) return answers.academicStrengths.length > 0;
+    const { currentStep, answers } = state;
+    if (currentStep === 1) return answers.workApproach !== '';
+    if (currentStep === 2) return answers.hollandCodeRanking.length === 6; // All items ranked
+    if (currentStep === 3) return answers.problemSolvingApproach !== '';
+    if (currentStep === 4) return answers.workLifeScenarios.length === 2;
+    if (currentStep === 5) return answers.fieldExposure.length > 0;
     return false;
   }, [state]);
 
