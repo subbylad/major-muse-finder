@@ -402,16 +402,21 @@ const QuestionnairePage = () => {
           throw new Error('AI service returned empty response');
         }
 
-        const { error: recommendationError } = await supabase
-          .from('recommendations')
-          .insert({
-            user_id: user.id,
-            questionnaire_response_id: state.responseId,
-            recommendations: response.data
-          });
+        // Only save recommendations if we have a valid response ID
+        if (state.responseId) {
+          const { error: recommendationError } = await supabase
+            .from('recommendations')
+            .insert({
+              user_id: user.id,
+              questionnaire_response_id: state.responseId,
+              recommendations: response.data
+            });
 
-        if (recommendationError) {
-          console.error('Error saving recommendations:', recommendationError);
+          if (recommendationError) {
+            console.error('Error saving recommendations:', recommendationError);
+          }
+        } else {
+          console.warn('No response ID available, skipping recommendation save');
         }
 
         navigate('/results', { 
