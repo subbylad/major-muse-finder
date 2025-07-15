@@ -11,7 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { HollandCodeRanking } from "@/components/questionnaire/HollandCodeRanking";
 import { ScaleQuestion } from "@/components/questionnaire/ScaleQuestion";
-import type { toErrorWithMessage } from '@/types/questionnaire';
+import { toErrorWithMessage } from '@/types/questionnaire';
 
 const QuestionnairePage = () => {
   const navigate = useNavigate();
@@ -21,6 +21,38 @@ const QuestionnairePage = () => {
   
   const totalSteps = 5;
   const isFreshStart = searchParams.get('fresh') === 'true';
+
+  // Load progress from existing response
+  const loadProgressFromResponse = useCallback((response: Record<string, unknown>) => {
+    let step = 1;
+    const progress: Record<string, unknown> = {};
+    
+    if (response.question_1_interests) {
+      progress.workApproach = response.question_1_interests;
+      step = 2;
+    }
+    
+    if (response.question_2_work_style) {
+      progress.hollandCodeRanking = response.question_2_work_style;
+      step = 3;
+    }
+    
+    if (response.question_3_skills) {
+      progress.problemSolvingApproach = response.question_3_skills;
+      step = 4;
+    }
+    
+    if (response.question_4_values) {
+      progress.workLifeScenarios = response.question_4_values;
+      step = 5;
+    }
+    
+    if (response.question_5_academic_strengths) {
+      progress.fieldExposure = response.question_5_academic_strengths;
+    }
+    
+    actions.loadProgress({ ...progress, step });
+  }, [actions]);
 
   // Check if user is authenticated and load any existing progress
   const checkAuthAndLoadProgress = useCallback(async () => {
@@ -301,38 +333,6 @@ const QuestionnairePage = () => {
     { id: "work-environment", label: "Work Environment", description: "Workplace culture/setting was different" },
     { id: "still-learning", label: "Still Learning", description: "Haven't had enough exposure yet" }
   ];
-
-  // Load progress from existing response
-  const loadProgressFromResponse = useCallback((response: Record<string, unknown>) => {
-    let step = 1;
-    const progress: Record<string, unknown> = {};
-    
-    if (response.question_1_interests) {
-      progress.workApproach = response.question_1_interests;
-      step = 2;
-    }
-    
-    if (response.question_2_work_style) {
-      progress.hollandCodeRanking = response.question_2_work_style;
-      step = 3;
-    }
-    
-    if (response.question_3_skills) {
-      progress.problemSolvingApproach = response.question_3_skills;
-      step = 4;
-    }
-    
-    if (response.question_4_values) {
-      progress.workLifeScenarios = response.question_4_values;
-      step = 5;
-    }
-    
-    if (response.question_5_academic_strengths) {
-      progress.fieldExposure = response.question_5_academic_strengths;
-    }
-    
-    actions.loadProgress({ ...progress, step });
-  }, [actions]);
 
   // Save progress to database
   const saveProgress = async (stepData: Record<string, unknown>) => {
