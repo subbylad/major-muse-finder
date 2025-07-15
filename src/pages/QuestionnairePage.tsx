@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuestionnaireState } from "@/hooks/useQuestionnaireState";
@@ -14,10 +14,12 @@ import { ArrowLeft, ArrowRight, Calculator, FlaskConical, Palette, PenTool, Brie
 
 const QuestionnairePage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { state, actions, canProceed } = useQuestionnaireState();
   
   const totalSteps = 5;
+  const isFreshStart = searchParams.get('fresh') === 'true';
 
   // Check if user is authenticated and load any existing progress
   useEffect(() => {
@@ -32,7 +34,32 @@ const QuestionnairePage = () => {
           return;
         }
 
-        // Check for existing incomplete response
+        // If this is a fresh start (retake), skip resume logic and create new response
+        if (isFreshStart) {
+          const { data: newResponse, error } = await supabase
+            .from('questionnaire_responses')
+            .insert({ user_id: user.id })
+            .select()
+            .single();
+
+          if (error) {
+            toast({
+              title: "Error",
+              description: "Failed to start questionnaire. Please try again.",
+              variant: "destructive",
+            });
+            actions.setResumingProgress(false);
+            return;
+          }
+
+          if (isEffectActive) {
+            actions.setResponseId(newResponse.id);
+            actions.setResumingProgress(false);
+          }
+          return;
+        }
+
+        // Check for existing incomplete response only if not a fresh start
         const { data: existingResponse, error: queryError } = await supabase
           .from('questionnaire_responses')
           .select('*')

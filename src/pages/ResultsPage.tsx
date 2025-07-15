@@ -73,12 +73,11 @@ const ResultsPage = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Delete any existing incomplete questionnaire responses to start fresh
+        // Delete ALL questionnaire responses (both completed and incomplete) to start completely fresh
         await supabase
           .from('questionnaire_responses')
           .delete()
-          .eq('user_id', user.id)
-          .eq('is_completed', false);
+          .eq('user_id', user.id);
 
         // Check if user has previous results for comparison
         const { data: previousResults } = await supabase
@@ -94,12 +93,18 @@ const ResultsPage = () => {
             description: "Your new results will be compared to your previous attempt.",
           });
         }
+
+        toast({
+          title: "🔄 Starting fresh!",
+          description: "Taking you to the beginning of the questionnaire.",
+        });
       }
     } catch (error) {
       console.error('Error preparing retake:', error);
     }
     
-    navigate('/questionnaire');
+    // Navigate with a query parameter to force a fresh start
+    navigate('/questionnaire?fresh=true');
   };
 
   const handleSaveResults = () => {
