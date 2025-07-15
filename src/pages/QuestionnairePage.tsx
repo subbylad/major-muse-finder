@@ -295,8 +295,19 @@ const QuestionnairePage = () => {
           return;
         }
 
+        // Check for existing completed questionnaires and delete them
+        // This prevents the unique constraint violation
+        const { error: deleteError } = await supabase
+          .from('questionnaire_responses')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('is_completed', true);
+
+        if (deleteError) {
+          console.error('Error deleting existing completed questionnaires:', deleteError);
+        }
+
         // Save final answer and mark as completed
-        
         const { error: updateError } = await supabase
           .from('questionnaire_responses')
           .update({
@@ -319,13 +330,13 @@ const QuestionnairePage = () => {
           body: { answers: finalAnswers }
         });
         
-        const response = await Promise.race([aiPromise, timeoutPromise]);
+        const response = await Promise.race([aiPromise, timeoutPromise]) as any;
 
-        if (response.error) {
+        if (response?.error) {
           throw new Error(`AI Service Error: ${response.error.message || 'Unknown error'}`);
         }
         
-        if (!response.data) {
+        if (!response?.data) {
           throw new Error('AI service returned empty response');
         }
 
