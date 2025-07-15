@@ -24,6 +24,11 @@ const HistoryPage = () => {
   }, [user, authLoading, loadHistory]);
 
   const loadHistory = useCallback(async (userId: string) => {
+    if (!userId) {
+      console.error('No user ID provided to loadHistory');
+      return;
+    }
+    
     try {
       setIsLoading(true);
       
@@ -34,9 +39,10 @@ const HistoryPage = () => {
       setResponses(data || []);
     } catch (error) {
       console.error('Error loading history:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: "Error",
-        description: "Failed to load your history. Please try again.",
+        description: `Failed to load your history: ${errorMessage}. Please try again.`,
         variant: "destructive",
       });
     } finally {

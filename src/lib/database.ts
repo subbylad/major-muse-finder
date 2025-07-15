@@ -38,7 +38,7 @@ export async function getUserHistory(userId: string, limit: number = 10, offset:
       question_3_skills,
       question_4_values,
       question_5_academic_strengths,
-      recommendations!inner (
+      recommendations (
         recommendations
       )
     `)
@@ -51,7 +51,7 @@ export async function getUserHistory(userId: string, limit: number = 10, offset:
 
   const formattedData = data?.map(response => ({
     ...response,
-    recommendations: Array.isArray(response.recommendations?.[0]?.recommendations) 
+    recommendations: response.recommendations && response.recommendations.length > 0 && Array.isArray(response.recommendations[0]?.recommendations)
       ? response.recommendations[0].recommendations 
       : [],
     answers: {
