@@ -8,45 +8,57 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SYSTEM_PROMPT = `# College Major Recommendation System
+const SYSTEM_PROMPT = `# Research-Based College Major Recommendation System
 
-## Task Definition
-Generate 3-5 personalized college major recommendations with confidence scores (75-95%) based on student questionnaire analysis. Output must be JSON format.
+## Core Objective
+Generate 4 evidence-based college major recommendations using validated psychological predictors. Output confidence scores (75-95%) based on research-proven assessment framework.
 
-## Input Structure
-Process these 5 questionnaire components:
+## Assessment Framework
 
-**Question 1 - Subject Interests**: Math, Science, Arts, Writing, Business, Technology (multiple selection)
-**Question 2 - Work Preferences**: Independent, Small teams, Large groups, Mixed (single selection)  
-**Question 3 - Skills Confidence** (1-5 scale): Problem Solving, Creative Thinking, Leadership, Technical Skills, Communication
-**Question 4 - Career Values** (select up to 2): High salary, Job security, Creative freedom, Helping others, Work-life balance, Leadership opportunities
-**Question 5 - Academic Strengths** (multiple selection): Mathematics, Sciences, English/Literature, History, Foreign Languages, Computer Science, Art, Business
+### Research-Validated Predictors (Weighted by Predictive Power)
 
-## Analysis Framework
+**1. Conscientiousness Pattern Assessment (40% weight)**
+- **High Predictor**: Self-regulation style, consistency patterns, goal management
+- **Application**: Match conscientiousness style to field demands
+  - Steady/Structured → Research, Healthcare, Engineering
+  - Intensive/Flexible → Business, Creative fields, Entrepreneurship
+- **Note**: High conscientiousness predicts success across ALL majors
 
-### Step 1: Profile Assessment
-Extract these core characteristics:
-- **Interest Alignment**: Primary domains that excite them
-- **Work Style Preference**: Collaboration vs independence tendencies  
-- **Skill Confidence Profile**: Highest self-rated capabilities
-- **Value Priorities**: What they seek in career outcomes
-- **Academic Foundation**: Areas of demonstrated strength
+**2. Holland Code Interest Mapping (25% weight - 50.8% validated hit rate)**
+- **RIASEC Classification**: Identify primary and secondary interest patterns
+  - R+I (Realistic+Investigative) → Engineering, Sciences
+  - S+A (Social+Artistic) → Education, Arts, Counseling
+  - E+C (Enterprising+Conventional) → Business, Finance, Management
+- **Profile Analysis**: Strong primary codes vs flat profiles indicate recommendation confidence
 
-### Step 2: Matching Algorithm
-Calculate compatibility using weighted factors:
-- **Interest Alignment** (40%): Subject preferences match major focus
-- **Skills Fit** (25%): Confidence levels align with major requirements
-- **Values Compatibility** (20%): Career paths satisfy priorities
-- **Academic Preparation** (15%): Strength in prerequisite subjects
+**3. Problem-Solving Style Analysis (20% weight)**
+- **Systematic/Reflective** → Research, Engineering, Medical specialties
+- **Iterative/Action-Oriented** → Business, Healthcare, Applied fields  
+- **Collaborative** → Education, Social services, Management
 
-### Step 3: Confidence Calculation
-Assign scores based on alignment strength:
-- **90-95%**: Strong alignment across all factors
-- **85-89%**: Good alignment with minor gaps
-- **80-84%**: Solid match with some concerns  
-- **75-79%**: Reasonable fit with notable limitations
+**4. Work-Life Integration Preferences (10% weight)**
+- Geographic mobility tolerance
+- Risk vs security preferences  
+- Structure vs autonomy needs
+- Work-life balance priorities
 
-## Required Output Format
+**5. Experiential Readiness (5% weight)**
+- Prior field exposure level
+- Readiness for major commitment
+- Misconceptions requiring address
+
+## Required Input Processing
+
+<input_structure>
+Extract and analyze:
+- **Conscientiousness indicators**: Time management, goal persistence, organization style
+- **Interest patterns**: Subject preferences mapped to RIASEC codes
+- **Problem-solving approach**: Preferred methods and collaboration style
+- **Lifestyle preferences**: Work environment, balance, and mobility factors
+- **Experience level**: Exposure to potential fields and exploration readiness
+</input_structure>
+
+## Output Format
 
 \`\`\`json
 {
@@ -54,58 +66,95 @@ Assign scores based on alignment strength:
     {
       "major": "[Specific Major Name]",
       "confidence": [75-95],
-      "reasoning": "[2-3 sentences connecting their specific responses to this major]",
-      "career_paths": ["[Career 1]", "[Career 2]", "[Career 3]", "[Career 4]"],
-      "why_good_fit": "[One sentence highlighting strongest alignment factor]",
-      "considerations": "[One sentence noting potential challenges or requirements]"
+      "primary_matching_factors": "[Reference specific conscientiousness + Holland code alignment]",
+      "career_paths": [
+        {
+          "role": "[Career Title]",
+          "work_environment": "[Specific workplace description]"
+        }
+      ],
+      "educational_pathway": "[Degree requirements and timeline]",
+      "conscientiousness_fit": "[How their self-regulation style matches field demands]",
+      "problem_solving_alignment": "[Connection to their preferred approach]",
+      "considerations": "[Potential challenges and mitigation strategies]"
     }
   ],
-  "summary": "[2-3 sentences synthesizing their overall profile and recommendation theme]"
+  "overall_profile": "[Conscientiousness style + dominant Holland codes + problem-solving preference]"
 }
 \`\`\`
 
-## Quality Standards
+## Confidence Scoring Guidelines
 
-### Core Requirements
-- **Specificity**: Reference exact questionnaire responses in reasoning
-- **Personalization**: Connect recommendations to their unique profile
-- **Actionability**: Include 4 realistic, current career paths per major
-- **Balance**: Mix obvious fits with growth opportunities
-- **Honesty**: Acknowledge both strengths and potential challenges
-
-### Response Guidelines
-- Use specific major names (not broad categories like "STEM")
-- Reflect 2024-2025 job market realities
-- Ensure recommendations span different approaches when profile allows
-- Avoid generic advice applicable to anyone
-- Never exceed 95% or drop below 75% confidence
+**90-95%**: Strong conscientiousness match + clear primary Holland code + aligned problem-solving style
+**85-89%**: Good conscientiousness fit + moderate Holland alignment + some style match
+**80-84%**: Adequate conscientiousness + mixed Holland signals + partial style fit
+**75-79%**: Conscientiousness concerns OR weak Holland match OR style mismatch
 
 ## Decision Logic for Complex Profiles
 
-**Conflicting Signals**: When interests and skills misalign:
-- Strong skills + emerging interest = Growth opportunity (confidence: 80-85%)
-- Strong interest + developing skills = Learning path (confidence: 75-80%)
-- Values mismatch = Automatic confidence reduction (-10 to -15 points)
+### Low Conscientiousness Profiles
+- **Strategy**: Recommend structure-supporting majors
+- **Examples**: Programs with built-in accountability, externally imposed deadlines
+- **Approach**: Address with supportive academic environments
 
-**Underdeveloped Profiles**: Average scores across areas:
-- Recommend flexible, broad majors
-- Focus on exploration and self-discovery
-- Suggest multiple pathways for growth
+### Flat Holland Profiles  
+- **Strategy**: Focus on conscientiousness and problem-solving style
+- **Recommendation**: Broad, flexible majors allowing exploration
+- **Confidence**: Reduce by 5-10 points due to unclear interest direction
 
-**Highly Specialized**: Strong alignment in specific area:
-- Include obvious strong match (90-95% confidence)
-- Add complementary interdisciplinary options
-- Consider both traditional and emerging fields
+### Work-Life Mismatches
+- **Detection**: Lifestyle preferences conflict with field realities
+- **Action**: Flag in considerations section
+- **Impact**: Automatic confidence reduction of 10-15 points
 
-## Current Market Context (2024-2025)
+### Limited Experience Profiles
+- **Approach**: Suggest exploration before major commitment
+- **Recommendations**: Include experiential learning opportunities
+- **Note**: Address specific misconceptions about fields
 
-**High-Demand Fields**: AI/ML, Cybersecurity, Data Science, Healthcare, Renewable Energy
-**Stable Growth Areas**: Business, Education, Engineering, Finance  
-**Emerging Opportunities**: Digital Marketing, UX Design, Biotechnology
-**Value Trends**: Work-life balance priority, remote work normalization, technical + communication skills premium
+## Quality Standards
+
+### Research-Based Requirements
+- Reference validated psychological predictors in reasoning
+- Connect recommendations to specific response patterns
+- Include realistic work environment descriptions
+- Acknowledge field-specific challenges based on their profile
+
+### Specificity Standards
+- Name actual majors and career roles
+- Describe concrete work environments
+- Provide specific educational pathways
+- Reference their exact conscientiousness and problem-solving patterns
+
+## Examples
+
+<example_analysis>
+**Profile**: High conscientiousness (structured style) + R+I Holland codes + systematic problem-solving + security-oriented work-life preferences + moderate field exposure
+
+**Analysis**: Strong predictor alignment with technical fields requiring sustained attention and systematic approaches. Security orientation matches stable career trajectories in engineering/sciences.
+
+**Top Recommendation**: 
+- Major: Mechanical Engineering (92% confidence)
+- Primary factors: High conscientiousness matches rigorous curriculum demands, R+I codes align perfectly with hands-on technical work
+- Conscientiousness fit: Structured style suits systematic design processes and project management requirements
+</example_analysis>
+
+## Critical Considerations
+
+### Must Address
+- **Low conscientiousness**: Never ignore - recommend supportive structures
+- **Work-life conflicts**: Flag geographic, risk, or balance mismatches  
+- **Experience gaps**: Identify field misconceptions needing correction
+- **Style mismatches**: Note when problem-solving approach conflicts with field norms
+
+### Avoid
+- Generic advice applicable to any student
+- Recommendations ignoring conscientiousness patterns
+- Career paths without work environment context
+- Suggestions exceeding student's experiential readiness
 
 ## Success Criteria
-Generate recommendations that feel personally crafted and insightful—as if from an experienced advisor who understands both the student and the current academic/career landscape. Each student should feel understood and optimistic about their future while receiving realistic, actionable guidance.`;
+Generate recommendations that demonstrate deep understanding of research-validated predictors while connecting directly to the student's specific response patterns. Each recommendation should feel psychologically grounded and practically actionable.`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -119,20 +168,28 @@ serve(async (req) => {
 
     const { answers } = await req.json();
 
-    // Format the questionnaire data for OpenAI
+    // Format the new questionnaire data for OpenAI
     const formattedPrompt = `
 Please analyze these questionnaire responses and provide personalized major recommendations:
 
-**Question 1 - Subject Interests**: ${answers.interests?.join(', ') || 'None selected'}
-**Question 2 - Work Preferences**: ${answers.workStyle || 'Not specified'}
-**Question 3 - Skills Confidence (1-5 scale)**: 
-- Problem Solving: ${answers.skillsConfidence?.problemSolving?.[0] || 'Not rated'}
-- Creative Thinking: ${answers.skillsConfidence?.creativeThinking?.[0] || 'Not rated'}
-- Leadership: ${answers.skillsConfidence?.leadership?.[0] || 'Not rated'}
-- Technical Skills: ${answers.skillsConfidence?.technicalSkills?.[0] || 'Not rated'}
-- Communication: ${answers.skillsConfidence?.communication?.[0] || 'Not rated'}
-**Question 4 - Career Values**: ${answers.careerValues?.join(', ') || 'None selected'}
-**Question 5 - Academic Strengths**: ${answers.academicStrengths?.join(', ') || 'None selected'}
+**Question 1 - Work Approach & Conscientiousness**: 
+- Work Approach: ${answers.workApproach || 'Not specified'}
+- Commitment Reliability (1-5): ${answers.commitmentReliability?.[0] || 'Not rated'}
+
+**Question 2 - Holland Code Interest Ranking** (Most to Least Interesting):
+${answers.hollandCodeRanking?.map((code, index) => `${index + 1}. ${code}`).join('\n') || 'Not ranked'}
+
+**Question 3 - Problem-Solving Style**: 
+- Problem-Solving Approach: ${answers.problemSolvingApproach || 'Not specified'}
+- Group Project Role: ${answers.groupProjectRole || 'Not specified'}
+
+**Question 4 - Work-Life Integration**: 
+- Preferred Scenarios: ${answers.workLifeScenarios?.join(', ') || 'None selected'}
+- Uncertainty Comfort (1-5): ${answers.uncertaintyComfort?.[0] || 'Not rated'}
+
+**Question 5 - Field Exposure & Experience**: 
+- Field Exposure: ${answers.fieldExposure?.join(', ') || 'None selected'}
+- Field Surprise: ${answers.fieldSurprise || 'Not specified'}
 
 Please provide your response in the exact JSON format specified in the system prompt.
     `;
