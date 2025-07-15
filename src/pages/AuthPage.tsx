@@ -122,11 +122,12 @@ const AuthPage = () => {
         
         navigate("/questionnaire");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Auth error:', error);
+      const errorMessage = error instanceof Error ? error.message : "An error occurred during authentication";
       toast({
         title: "Error",
-        description: error.message || "An error occurred during authentication",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

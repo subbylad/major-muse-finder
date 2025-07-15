@@ -80,7 +80,7 @@ export async function getUserDataForExport(userId: string) {
 }
 
 // Batch update questionnaire progress
-export async function batchUpdateQuestionnaireProgress(responseId: string, updates: Record<string, any>) {
+export async function batchUpdateQuestionnaireProgress(responseId: string, updates: Record<string, unknown>) {
   const { data, error } = await supabase
     .from('questionnaire_responses')
     .update(updates)
@@ -92,7 +92,7 @@ export async function batchUpdateQuestionnaireProgress(responseId: string, updat
 }
 
 // Check if user has existing incomplete questionnaire (cached)
-let incompleteQuestionnaireCache: { [userId: string]: string | null } = {};
+const incompleteQuestionnaireCache: { [userId: string]: string | null } = {};
 
 export async function getIncompleteQuestionnaire(userId: string, useCache: boolean = true) {
   if (useCache && incompleteQuestionnaireCache[userId] !== undefined) {

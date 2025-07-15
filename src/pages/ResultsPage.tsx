@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, RotateCcw, Save, Trophy, Sparkles, Star, Award, Crown, Medal, PartyPopper, Share, AlertCircle } from "lucide-react";
+import { CheckCircle, RotateCcw, Save, Trophy, Sparkles, Star, Award, Crown, Medal, PartyPopper, Share, AlertCircle, ArrowLeft, Home } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { RecommendationData, AIRecommendationResponse } from '@/types/questionnaire';
 
 const ResultsPage = () => {
   const navigate = useNavigate();
@@ -15,10 +16,16 @@ const ResultsPage = () => {
   const [showCards, setShowCards] = useState(false);
 
   // Get recommendations from navigation state
-  const recommendations = location.state?.recommendations?.recommendations || null;
-  const answers = location.state?.answers || null;
-  const summary = location.state?.recommendations?.summary || null;
-  const hasError = location.state?.recommendations?.error || false;
+  const locationState = location.state as {
+    recommendations?: AIRecommendationResponse;
+    answers?: unknown;
+    responseId?: string;
+  } | null;
+  
+  const recommendations = locationState?.recommendations?.recommendations || null;
+  const answers = locationState?.answers || null;
+  const summary = locationState?.recommendations?.summary || null;
+  const hasError = locationState?.recommendations?.error || false;
 
   useEffect(() => {
     // If no recommendations, redirect to questionnaire
@@ -73,11 +80,12 @@ const ResultsPage = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Delete ALL questionnaire responses (both completed and incomplete) to start completely fresh
+        // Only delete INCOMPLETE questionnaire responses to preserve history
         await supabase
           .from('questionnaire_responses')
           .delete()
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .eq('is_completed', false);
 
         // Check if user has previous results for comparison
         const { data: previousResults } = await supabase
@@ -158,6 +166,18 @@ const ResultsPage = () => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="container mx-auto max-w-4xl">
+        {/* Back Button */}
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="text-muted-foreground hover:text-foreground font-normal"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
+          </Button>
+        </div>
+
         {/* Header - Minimal */}
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-normal mb-8 text-foreground leading-tight tracking-tight">
@@ -171,7 +191,7 @@ const ResultsPage = () => {
 
         {/* Recommendation Cards - Minimal */}
         <div className="space-y-8 mb-16">
-          {recommendations?.map((rec: any, index: number) => (
+          {recommendations?.map((rec: RecommendationData, index: number) => (
             <div 
               key={rec.major} 
               className="border border-border rounded-lg p-8 transition-all duration-200 hover:border-muted-foreground"
@@ -218,7 +238,7 @@ const ResultsPage = () => {
                 <div>
                   <h4 className="text-foreground font-normal mb-3 text-base">Career paths</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {rec.career_paths?.map((career: any, idx: number) => (
+                    {rec.career_paths?.map((career: string | { role: string; work_environment: string }, idx: number) => (
                       <div
                         key={idx}
                         className="px-3 py-2 bg-muted rounded text-muted-foreground text-sm"
@@ -234,7 +254,15 @@ const ResultsPage = () => {
         </div>
 
         {/* Action Buttons - Minimal */}
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/history')}
+            className="border border-border text-foreground hover:bg-muted px-6 py-3 text-base font-normal rounded-lg transition-all duration-200"
+          >
+            View History
+          </Button>
+          
           <Button
             variant="outline"
             onClick={handleRetakeQuiz}

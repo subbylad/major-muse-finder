@@ -46,7 +46,8 @@ type QuestionnaireAction =
   | { type: 'SET_RESUMING_PROGRESS'; payload: boolean }
   | { type: 'LOAD_PROGRESS'; payload: Partial<QuestionnaireAnswers> & { step?: number } }
   | { type: 'TOGGLE_WORK_LIFE_SCENARIO'; payload: string }
-  | { type: 'TOGGLE_FIELD_EXPOSURE'; payload: string };
+  | { type: 'TOGGLE_FIELD_EXPOSURE'; payload: string }
+  | { type: 'RESET_STATE'; payload?: never };
 
 const initialState: QuestionnaireState = {
   currentStep: 1,
@@ -175,6 +176,12 @@ function questionnaireReducer(state: QuestionnaireState, action: QuestionnaireAc
       };
     }
     
+    case 'RESET_STATE':
+      return {
+        ...initialState,
+        isResumingProgress: false
+      };
+    
     default:
       return state;
   }
@@ -246,6 +253,10 @@ export function useQuestionnaireState() {
 
     toggleFieldExposure: useCallback((exposureId: string) => {
       dispatch({ type: 'TOGGLE_FIELD_EXPOSURE', payload: exposureId });
+    }, []),
+
+    resetState: useCallback(() => {
+      dispatch({ type: 'RESET_STATE' });
     }, []),
   };
 

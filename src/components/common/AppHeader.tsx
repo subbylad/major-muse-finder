@@ -5,9 +5,10 @@ import { Home, User } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export const AppHeader = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthCheck } from "@/hooks/useAuthCheck";
@@ -8,28 +8,22 @@ import { getUserHistory } from "@/lib/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Trophy, RotateCcw, Eye } from "lucide-react";
-
-interface QuestionnaireResponse {
-  id: string;
-  completed_at: string;
-  answers: any;
-  recommendations: any[];
-}
+import type { FormattedHistoryResponse, RecommendationData } from '@/types/questionnaire';
 
 const HistoryPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuthCheck();
-  const [responses, setResponses] = useState<QuestionnaireResponse[]>([]);
+  const [responses, setResponses] = useState<FormattedHistoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (user && !authLoading) {
       loadHistory(user.id);
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, loadHistory]);
 
-  const loadHistory = async (userId: string) => {
+  const loadHistory = useCallback(async (userId: string) => {
     try {
       setIsLoading(true);
       
@@ -48,9 +42,9 @@ const HistoryPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
-  const viewResults = (response: QuestionnaireResponse) => {
+  const viewResults = (response: FormattedHistoryResponse) => {
     navigate('/results', {
       state: {
         recommendations: { recommendations: response.recommendations },
@@ -147,7 +141,7 @@ const HistoryPage = () => {
                     <div>
                       <h4 className="font-normal mb-3 text-foreground">Top Recommendations:</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {response.recommendations.slice(0, 4).map((rec: any, idx: number) => (
+                        {response.recommendations.slice(0, 4).map((rec: RecommendationData, idx: number) => (
                           <div
                             key={idx}
                             className="flex items-center justify-between p-3 bg-muted rounded"

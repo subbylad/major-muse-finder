@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Download, Trash2, History } from "lucide-react";
+import { toErrorWithMessage } from '@/types/questionnaire';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -46,10 +47,11 @@ const ProfilePage = () => {
         title: "Email Update Requested",
         description: "Please check both your old and new email addresses for confirmation links.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = toErrorWithMessage(error);
       toast({
         title: "Error",
-        description: error.message,
+        description: errorMessage.message,
         variant: "destructive",
       });
     } finally {
@@ -88,10 +90,11 @@ const ProfilePage = () => {
       });
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = toErrorWithMessage(error);
       toast({
         title: "Error",
-        description: error.message,
+        description: errorMessage.message,
         variant: "destructive",
       });
     } finally {
@@ -130,10 +133,11 @@ const ProfilePage = () => {
         title: "Data Exported",
         description: "Your data has been downloaded as a JSON file.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = toErrorWithMessage(error);
       toast({
         title: "Export Failed",
-        description: error.message,
+        description: errorMessage.message,
         variant: "destructive",
       });
     } finally {
@@ -160,7 +164,8 @@ const ProfilePage = () => {
       });
       
       navigate('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = toErrorWithMessage(error);
       toast({
         title: "Error",
         description: "Failed to delete account. Please contact support.",

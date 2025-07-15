@@ -1,7 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 // Cache authenticated user to avoid repeated API calls
-let cachedUser: any = null;
+let cachedUser: User | null = null;
 let cacheExpiry: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { HollandCodeRanking } from "@/components/questionnaire/HollandCodeRanking";
 import { ScaleQuestion } from "@/components/questionnaire/ScaleQuestion";
+import type { toErrorWithMessage } from '@/types/questionnaire';
 
 const QuestionnairePage = () => {
   const navigate = useNavigate();
@@ -22,19 +23,21 @@ const QuestionnairePage = () => {
   const isFreshStart = searchParams.get('fresh') === 'true';
 
   // Check if user is authenticated and load any existing progress
-  useEffect(() => {
-    let isEffectActive = true;
+  const checkAuthAndLoadProgress = useCallback(async () => {
+    const isEffectActive = true;
     
-    const checkAuthAndLoadProgress = async () => {
-      try {
+    try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           navigate('/auth');
           return;
         }
 
-        // If this is a fresh start (retake), skip resume logic and create new response
+        // If this is a fresh start (retake), reset state and create new response
         if (isFreshStart) {
+          // Reset the entire questionnaire state
+          actions.resetState();
+          
           const { data: newResponse, error } = await supabase
             .from('questionnaire_responses')
             .insert({ user_id: user.id })
@@ -136,16 +139,30 @@ const QuestionnairePage = () => {
           });
         }
       }
-    };
-    
+  }, [isFreshStart, actions, toast, navigate, loadProgressFromResponse]);
+  
+  useEffect(() => {
     if (state.isResumingProgress) {
       checkAuthAndLoadProgress();
     }
+  }, [state.isResumingProgress, checkAuthAndLoadProgress]);
+
+  // Warn user before leaving page if they have progress
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (state.currentStep > 1 && !state.isLoading) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved progress. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
     
     return () => {
-      isEffectActive = false;
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [state.isResumingProgress]);
+  }, [state.currentStep, state.isLoading]);
 
   // Question 1: Work Approach Options
   const workApproachOptions = [
@@ -286,9 +303,9 @@ const QuestionnairePage = () => {
   ];
 
   // Load progress from existing response
-  const loadProgressFromResponse = (response: any) => {
+  const loadProgressFromResponse = useCallback((response: Record<string, unknown>) => {
     let step = 1;
-    const progress: any = {};
+    const progress: Record<string, unknown> = {};
     
     if (response.question_1_interests) {
       progress.workApproach = response.question_1_interests;
@@ -315,10 +332,10 @@ const QuestionnairePage = () => {
     }
     
     actions.loadProgress({ ...progress, step });
-  };
+  }, [actions]);
 
   // Save progress to database
-  const saveProgress = async (stepData: any) => {
+  const saveProgress = async (stepData: Record<string, unknown>) => {
     if (!state.responseId) return;
 
     try {
@@ -392,7 +409,7 @@ const QuestionnairePage = () => {
           body: { answers: finalAnswers }
         });
         
-        const response = await Promise.race([aiPromise, timeoutPromise]) as any;
+        const response = await Promise.race([aiPromise, timeoutPromise]) as { data?: unknown; error?: { message?: string } };
 
         if (response?.error) {
           throw new Error(`AI Service Error: ${response.error.message || 'Unknown error'}`);
@@ -419,6 +436,12 @@ const QuestionnairePage = () => {
           console.warn('No response ID available, skipping recommendation save');
         }
 
+        // Show success message
+        toast({
+          title: "🎉 Questionnaire Complete!",
+          description: "Your personalized recommendations are ready. You can view them anytime in your history.",
+        });
+        
         navigate('/results', { 
           state: { 
             recommendations: response.data,
@@ -427,11 +450,13 @@ const QuestionnairePage = () => {
           } 
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = toErrorWithMessage(error);
+        
+        console.error('AI recommendation generation failed:', error);
         
         toast({
           title: "AI Service Error",
-          description: `${errorMessage}. Using backup recommendations.`,
+          description: `${errorMessage.message}. Using backup recommendations.`,
           variant: "default",
         });
         
@@ -450,6 +475,12 @@ const QuestionnairePage = () => {
           summary: "We encountered an issue with our AI service, so we've provided general recommendations. For personalized results, please try again later."
         };
 
+        // Show success message even for fallback
+        toast({
+          title: "🎉 Questionnaire Complete!",
+          description: "We've provided general recommendations. You can retake the quiz anytime for personalized results.",
+        });
+        
         navigate('/results', { 
           state: { 
             recommendations: fallbackRecommendations,

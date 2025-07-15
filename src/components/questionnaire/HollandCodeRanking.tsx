@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Card } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { GripVertical, Info } from 'lucide-react';
@@ -56,7 +56,7 @@ const hollandCodeItems: Record<string, HollandCodeItem> = {
 };
 
 export function HollandCodeRanking({ items, onReorder }: HollandCodeRankingProps) {
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
     const newItems = Array.from(items);

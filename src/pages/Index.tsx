@@ -6,11 +6,12 @@ import { GraduationCap, Target, Compass, Users } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { User } from '@supabase/supabase-js';
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -92,14 +93,27 @@ const Index = () => {
             A thoughtful questionnaire to help you find your ideal college major
           </p>
           
-          {/* CTA Button - Minimal design */}
-          <Button 
-            onClick={handleGetStarted}
-            className="bg-primary text-primary-foreground px-8 py-4 text-lg font-normal rounded-lg transition-all duration-200 hover:bg-primary/90 border-0"
-            disabled={isLoading}
-          >
-            {buttonText}
-          </Button>
+          {/* CTA Buttons - Minimal design */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button 
+              onClick={handleGetStarted}
+              className="bg-primary text-primary-foreground px-8 py-4 text-lg font-normal rounded-lg transition-all duration-200 hover:bg-primary/90 border-0"
+              disabled={isLoading}
+            >
+              {buttonText}
+            </Button>
+            
+            {user && (
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/history')}
+                className="border-border text-foreground hover:bg-muted px-8 py-4 text-lg font-normal rounded-lg transition-all duration-200"
+                disabled={isLoading}
+              >
+                View Previous Results
+              </Button>
+            )}
+          </div>
         </div>
         
         {/* Feature Grid - Minimal design */}
